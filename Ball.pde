@@ -8,28 +8,37 @@ class Ball {
     this.x = x;
     this.y = y;
   }
-  
+
   void display() {
-    text(msg, x, y);
-    //ellipse(x, y, 100, 100);
     
+    pushStyle();
+    stroke(0);
+    noFill();
+    ellipse(x, y, 100, 100);
+    popStyle();
+
+    pushStyle();
+    textAlign(CENTER, CENTER);
+    text(ballMsg, x, y);
+    popStyle();
+
     move();
   }
-  
+
   void move() {
     x += toX;
     y += toY;
-    
-    bounce();
-    racketBounce();
-  }
-  
-  void bounce() {
-    if(x < 0 || x > width) toX = -toX;
-    if(y < 0 || y > height) toY = -toY;
-  }
-  
-  void racketBounce() {
 
+    bounce();
+  }
+
+  void bounce() {
+    if (x < 0 || x > width) toX = -toX;
+    if (y < 0 || y > height) toY = -toY;
+  }
+
+  void racketBounce() {
+    
+    
   }
 }

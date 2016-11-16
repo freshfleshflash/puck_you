@@ -1,7 +1,4 @@
-import ddf.minim.*;
-import ddf.minim.analysis.*;
-import ddf.minim.effects.*;
-import ddf.minim.signals.*;
+int racket_ang = 0;
 
 class Player {
 
@@ -10,11 +7,9 @@ class Player {
 
   Racket leftRacket = new Racket(-1);
   Racket rightRacket = new Racket(1);
-  int racket_ang = 90;
 
   float level;
-  float f = 0;
-  float preF = 0;
+  float preLevel = 0;
 
   Player(float x, float y, int leftPin, int rightPin) {
     this.x = x;
@@ -23,20 +18,29 @@ class Player {
     this.rightPin = rightPin;
   }
 
+  void voiceControl() {
+    level = amp.analyze() * 10000;
+
+    if (level > levelThreshold) {
+      if (abs(level - preLevel) > 10) {
+        racket_ang = (int)map(level, levelThreshold, levelThreshold * 10, 0, 180);
+      }
+    }
+
+    racket_ang--;
+    racket_ang = constrain(racket_ang, 0, 180);
+  }
+
   void display() {
     pushMatrix();
     translate(x, y);
 
-    leftRacket.display(racket_ang);
-    rightRacket.display(racket_ang);
+    leftRacket.display(leftPin);
+    rightRacket.display(rightPin);
 
     popMatrix();
   }
-
-  void voiceControl() {
-
-  }
-
+  
   void keyControl() {
     if (keyPressed) {
       if (key == 'z' || key == 'Z') racket_ang--;
