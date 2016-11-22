@@ -35,12 +35,12 @@ class Player {
     pushMatrix();
     translate(x, y);
 
-    leftRacket.display(leftPin);
+    //leftRacket.display(leftPin);
     rightRacket.display(rightPin);
 
     popMatrix();
   }
-  
+
   void keyControl() {
     if (keyPressed) {
       if (key == 'z' || key == 'Z') racket_ang--;

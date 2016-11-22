@@ -16,6 +16,14 @@ AudioIn in;
 Arduino arduino;
 WebSocketP5 socket;
 
+RShape m_shape;
+
+import fisica.*;
+import geomerative.*;
+FWorld world;
+String filename = "handle.svg";
+FSVG obj;
+
 ArrayList<String> wordsStorage = new ArrayList<String>();
 String ballMsg = "Say some words!";
 boolean served = false;
@@ -51,22 +59,38 @@ void setup() {
   in = new AudioIn(this, 0);
   in.start();
   amp.input(in);
+
+  Fisica.init(this);
+  Fisica.setScale(20);
+
+  RG.init(this);
+
+  RG.setPolygonizer(RG.ADAPTATIVE);
+
+  world = new FWorld();
+  world.setEdges(this, color(0));
+  world.setGravity(0, 0);
+
+  createHandle(width/2, height/2);
 }
 
 void draw() {
   background(255);
+  
+  world.draw(this);
+  world.step();
 
   println(amp.analyze() * 10000);
 
   pushStyle();
   stroke(0, 0, 255);
-  //line(0, height/2, width, height/2);
+  line(0, height/2, width, height/2);
   popStyle();
 
   b.display();
   p1.display();
   p1.voiceControl();
-  p1.keyControl();
+  //p1.keyControl();
 
   for (int i = 1; i < wordsStorage.size(); i++) {
     text(wordsStorage.get(i), width * 0.75, i * 30);
@@ -87,7 +111,11 @@ void websocketOnMessage(WebSocketConnection con, String inputMsg) {
   if (inputMsg.equals("b****")) {
     inputMsg = "bitch";
   } 
-
+  
+  if (inputMsg.equals("개**")) {
+    inputMsg = "개새끼";
+  } 
+  
   wordsStorage.add(inputMsg);
 
   println("[wordsStorage] ");
@@ -115,4 +143,20 @@ void websocketOnOpen(WebSocketConnection con) {
 
 void websocketOnClosed(WebSocketConnection con) {
   println("A client left");
+}
+
+void createHandle(float x, float y) {
+  float angle = random(TWO_PI);
+  float magnitude = 200;
+  
+  obj = new FSVG(filename);
+  obj.setPosition(x, y);
+  obj.setRotation(angle+PI/2);
+  obj.setVelocity(magnitude*cos(angle), magnitude*sin(angle));
+  obj.setDamping(0);
+  //obj.setRestitution(50);
+  world.add(obj);
+  
+  
+  world.add(new FCircle(20));
 }
