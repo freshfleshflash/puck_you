@@ -1,37 +1,36 @@
-/*
-rightPinNum = 8
- */
+/* rightPinNum = 8 */
 
 boolean arduinoOn = false;
-float levelThreshold = 400;
+float levelThreshold = 40;
 
 import muthesius.net.*;
 import org.webbitserver.*;
+import fisica.*;
+import geomerative.*;
 import processing.serial.*;
 import cc.arduino.*;
 import processing.sound.*;
 
+WebSocketP5 socket;
+FWorld world;
+Arduino arduino;
 Amplitude amp;
 AudioIn in;
-Arduino arduino;
-WebSocketP5 socket;
 
-RShape m_shape;
+color borderColor = color(255, 255, 0);
 
-import fisica.*;
-import geomerative.*;
-FWorld world;
-String filename = "handle.svg";
-FSVG obj;
+ArrayList<Border> borders = new ArrayList<Border>();
+Ball ball;
+Racket racket;
+
+float borderW = 20;
 
 ArrayList<String> wordsStorage = new ArrayList<String>();
 String ballMsg = "Say some words!";
 boolean served = false;
 PFont font;
-PImage handle;
 
-Ball b;
-Player p1;
+Player player1, player2;
 
 void setup() {
   size(displayWidth, displayHeight);
@@ -39,62 +38,62 @@ void setup() {
 
   socket = new WebSocketP5(this, 8080);
 
-  b = new Ball(width/2, height/2);
-  p1 = new Player(0, height/2, 7, 8);
+  Fisica.init(this);
+  RG.init(this);
+  RG.setPolygonizer(RG.ADAPTATIVE);
+  world = new FWorld();
+  world.setEdges(borderColor);
+  world.setEdgesFriction(0);
+  world.setGravity(0, 0);
 
-  fill(0);
-  font = createFont("Arial-Black-32.vlw", 24);
-  textFont(font);
+  //borders.add(new Border(640, borderW/2, 900, borderW, 0));
+  //borders.add(new Border(640, 800-borderW/2, 900, borderW, 0));
+  //borders.add(new Border(400, 200, borderW, 200, 45));
 
-  handle = loadImage("handle.png");
+  ball = new Ball(50);
 
-  if (arduinoOn) {
-    println(Arduino.list());
-    arduino = new Arduino(this, Arduino.list()[2], 57600);
-    arduino.pinMode(7, Arduino.SERVO);
-    arduino.pinMode(8, Arduino.SERVO);
+  player1 = new Player(-1, 200, height/2);
+  player2 = new Player(1, width - 200, height/2);
+
+  //racket = new Racket();
+
+  world.add(ball);
+  //world.add(racket);
+  for (int i = 0; i < borders.size(); i++) {
+    world.add(borders.get(i));
   }
+
+  if (arduinoOn) connectArduino();
 
   amp = new Amplitude(this);
   in = new AudioIn(this, 0);
   in.start();
   amp.input(in);
-
-  Fisica.init(this);
-  Fisica.setScale(20);
-
-  RG.init(this);
-
-  RG.setPolygonizer(RG.ADAPTATIVE);
-
-  world = new FWorld();
-  world.setEdges(this, color(0));
-  world.setGravity(0, 0);
-
-  createHandle(width/2, height/2);
 }
+
+
 
 void draw() {
   background(255);
-  
-  world.draw(this);
+
+  player1.voiceControl();
+  //player1.keyControl();
+
+  player2.voiceControl();
+  //player2.keyControl();
+
+  world.draw();
   world.step();
 
   println(amp.analyze() * 10000);
 
-  pushStyle();
-  stroke(0, 0, 255);
-  line(0, height/2, width, height/2);
-  popStyle();
-
-  b.display();
-  p1.display();
-  p1.voiceControl();
-  //p1.keyControl();
 
   for (int i = 1; i < wordsStorage.size(); i++) {
     text(wordsStorage.get(i), width * 0.75, i * 30);
   }
+
+  line(0, height/2, 1280, height/2);
+  line(width/2, 0, width/2, 800);
 }
 
 void stop() {
@@ -104,6 +103,7 @@ void stop() {
 void websocketOnMessage(WebSocketConnection con, String inputMsg) {
   println(inputMsg);
 
+  //switch
   if (inputMsg.equals("f***")) {
     inputMsg = "fuck";
   }
@@ -111,11 +111,11 @@ void websocketOnMessage(WebSocketConnection con, String inputMsg) {
   if (inputMsg.equals("b****")) {
     inputMsg = "bitch";
   } 
-  
+
   if (inputMsg.equals("개**")) {
     inputMsg = "개새끼";
   } 
-  
+
   wordsStorage.add(inputMsg);
 
   println("[wordsStorage] ");
@@ -130,13 +130,6 @@ void websocketOnMessage(WebSocketConnection con, String inputMsg) {
   }
 }
 
-void connectArduino() {
-  println(Arduino.list());
-  arduino = new Arduino(this, Arduino.list()[2], 57600);
-  arduino.pinMode(7, Arduino.SERVO);
-  arduino.pinMode(8, Arduino.SERVO);
-}
-
 void websocketOnOpen(WebSocketConnection con) {
   println("A client joined");
 }
@@ -145,18 +138,9 @@ void websocketOnClosed(WebSocketConnection con) {
   println("A client left");
 }
 
-void createHandle(float x, float y) {
-  float angle = random(TWO_PI);
-  float magnitude = 200;
-  
-  obj = new FSVG(filename);
-  obj.setPosition(x, y);
-  obj.setRotation(angle+PI/2);
-  obj.setVelocity(magnitude*cos(angle), magnitude*sin(angle));
-  obj.setDamping(0);
-  //obj.setRestitution(50);
-  world.add(obj);
-  
-  
-  world.add(new FCircle(20));
+void connectArduino() {
+  println(Arduino.list());
+  arduino = new Arduino(this, Arduino.list()[2], 57600);
+  arduino.pinMode(7, Arduino.SERVO);
+  arduino.pinMode(8, Arduino.SERVO);
 }

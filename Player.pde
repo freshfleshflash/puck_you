@@ -2,20 +2,16 @@ int racket_ang = 0;
 
 class Player {
 
-  float x, y;
-  int leftPin, rightPin;
-
-  Racket leftRacket = new Racket(-1);
-  Racket rightRacket = new Racket(1);
-
+  Racket leftRacket, rightRacket;
   float level;
   float preLevel = 0;
 
-  Player(float x, float y, int leftPin, int rightPin) {
-    this.x = x;
-    this.y = y;
-    this.leftPin = leftPin;
-    this.rightPin = rightPin;
+  Player(int player, float x, float y) {
+    leftRacket = new Racket(player, -1, x, y);
+    world.add(leftRacket);
+
+    rightRacket = new Racket(player, 1, x, y);
+    world.add(rightRacket);
   }
 
   void voiceControl() {
@@ -29,16 +25,9 @@ class Player {
 
     racket_ang--;
     racket_ang = constrain(racket_ang, 0, 180);
-  }
 
-  void display() {
-    pushMatrix();
-    translate(x, y);
-
-    //leftRacket.display(leftPin);
-    rightRacket.display(rightPin);
-
-    popMatrix();
+    leftRacket.rotate_();
+    rightRacket.rotate_();
   }
 
   void keyControl() {
@@ -46,5 +35,8 @@ class Player {
       if (key == 'z' || key == 'Z') racket_ang--;
       if (key == 'x' || key == 'X') racket_ang++;
     }
+
+    leftRacket.rotate_();
+    rightRacket.rotate_();
   }
 }
