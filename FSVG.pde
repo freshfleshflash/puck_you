@@ -4,7 +4,7 @@ class FSVG extends FPoly {
   float w = 200;
   float h = 67;  
   float axisTranslation = 12;
-  float defaultAng = 30;
+  float defaultAng = 120;
 
   FSVG(String filename, int player, int dir) {
     super();
@@ -21,11 +21,11 @@ class FSVG extends FPoly {
     m_shape.transform(-axisTranslation, -h/2, w, h); 
     outline.transform(-axisTranslation, -h/2, w, h); 
 
-    m_shape.scale(player);
-    outline.scale(player);
-
     m_shape.rotate(radians(defaultAng * dir)); 
     outline.rotate(radians(defaultAng * dir)); 
+
+    m_shape.scale(player, 1);
+    outline.scale(player, 1);
 
     RPoint[] points = outline.getPoints();
 
@@ -38,7 +38,6 @@ class FSVG extends FPoly {
 
   void draw(PGraphics applet) {
     preDraw(applet);
-    println(m_shape.getCenter().x);
     m_shape.draw(applet);
     postDraw(applet);
   }
