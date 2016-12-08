@@ -4,7 +4,7 @@ class FSVG extends FPoly {
   float w = 200;
   float h = 67;  
   float axisTranslation = 12;
-  float defaultAng = 120;
+  float defaultAng = 0;
 
   FSVG(String filename, int player, int dir) {
     super();

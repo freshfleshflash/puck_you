@@ -1,28 +1,30 @@
 class Racket extends FSVG {
 
-  int player, dir;
+  int pin, player, dir;
 
-  Racket(int player, int dir, float px, float py) {
+  float test;
+
+  Racket(int pin, int player, int dir, float px, float py) {
     super("handle.svg", player, dir);
-    this.dir = dir;
+
+    this.pin = pin;
     this.player = player;
+    this.dir = dir;
 
     this.setStatic(true);
     this.setPosition(px, py);
     this.adjustPosition(0, 190 * dir);
     this.setStroke(0, 0, 0);
-    
-    this.setFriction(0);
-    
-    //this.setRestitution(1);  
+    this.setFriction(0);    
+
+    if (player == 1) this.setFill(0);  ////
   }
 
-  void rotate_() {
-    this.setRotation(radians(180 + racket_ang * -dir * player));
+  void rotate_(int level) {    
+    level = constrain(level, 0, 180);   
+    this.setRotation(radians(-level * dir * player));
 
-    if (arduinoOn) {
-      if (dir == -1) arduino.servoWrite(7, (int)map(racket_ang, 0, 180, 180, 0));
-      else if (dir == 1) arduino.servoWrite(8, racket_ang);
-    }
+    if (dir == -1) arduino.servoWrite(pin, (int)map(level, 0, 180, 180, 0));
+    if (dir == 1) arduino.servoWrite(pin, level);
   }
 }
