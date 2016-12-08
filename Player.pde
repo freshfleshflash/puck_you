@@ -1,9 +1,6 @@
-//int racketAng = 0;
+// pins {mic, button1, button2, left, right}
 
 class Player {
-
-  //int[] pins;
-  // pins {mic, button1, button2, left, right}
 
   int pin_mic;
   int pin_b1;
@@ -21,6 +18,8 @@ class Player {
   int prePressed = 0;
 
   boolean portal = false;
+
+  int[] levels = new int[30];
 
   Racket left, right;
 
@@ -43,84 +42,49 @@ class Player {
 
   void method() {
     this.controlWithVoice();
-    //this.generateBall();
     this.drawPortal();
     this.objectSomething();
   }
 
-  // arduino.analogRead(pins[0]);
-  void controlWithVoice() {
+  int levelId = 0;
+  int realLevel;
+
+  void controlWithVoice() {    
     level = arduino.analogRead(pin_mic);
-    //ellipse(x, y, level, level);
-    //println(pin_mic, level);
+    levels[levelId++] = level;
+    //if (pin_mic == 0) printArray(levels); ////
+    if (levelId == levels.length) levelId = 0;
 
-    //if (abs(level - preLevel) > 10) {
-    //  racketAng = (int)map(level, levelThreshold, levelThreshold * 10, 0, 180);
-    //}
+    int sum = 0;
+    for (int i = 0; i < levels.length; i++) sum += levels[i];
+    realLevel = (int)sum / levels.length;
 
-    //racketAng--;
-    //racketAng = constrain(racketAng, 0, 180);
-
-
-
-    left.rotate_(level);
-    right.rotate_(level);
+    if (pin_mic == 0) println(realLevel, level);
+    
+    if(arduino.digitalRead(pin_b2) == 1){  
+    left.rotate_(realLevel);
+    right.rotate_(realLevel);
+    }
   }
 
-  // arduino.digitalRead(pins[1]);
-  void generateBall() {
-    ////if (pressed - prePressed == 1) {
-    ////  socket.broadcast("start");
-    ////  balls.add(new Ball(x, ballSlot, 50, new PVector(-500 * player, 0)));     
-    ////  prePressed = 1;
-    ////} else if (pressed - prePressed == -1) {
-    ////  socket.broadcast("stop");
-    ////  world.add(balls.get(balls.size() - 1));
-    ////  prePressed = 0;
-    ////}
-
-    //if (arduino.digitalRead(pins[1]) - prePressed == 1) {
-    //  socket.broadcast("start");
-    //  //balls.add(new Ball(x, ballSlot, 50, new PVector(-500 * player, 0), "hello"));
-    //  prePressed = 1;
-    //} else if (arduino.digitalRead(pins[1]) - prePressed == -1) {
-    //  socket.broadcast("stop");
-
-    //  //if (wordsStorage.size() != 0) {
-    //  balls.add(new Ball(x, ballSlot, 50, new PVector(-500 * player, 0), wordsStorage.get(wordsStorage.size() - 1)));
-    //  world.add(balls.get(balls.size() - 1));
-    //  //}
-
-    //  println(wordsStorage.size());
-
-    //prePressed = 0;
-    //}
-
-    //for (int i = 0; i < balls.size(); i++) {
-    //  balls.get(i).move();
-    //}
-  }
-
-  // arduino.digitalRead(pins[2]);
   void objectSomething() {
     Obstacle o = obstacles.get(0);
 
     //if (keyPressed) {
-      if (arduino.digitalRead(pin_b2) == 1) {      
-        pushStyle();
-        noStroke();
-        fill(255, 0, 0);
-        //Obstacle o = obstacles.get((int)random(0, obstacles.size()-1));
+    if (arduino.digitalRead(pin_b2) == 1) {      
+      pushStyle();
+      noStroke();
+      fill(255, 0, 0);
 
-        ellipse(o.x, o.y, 150, 150);
-        popStyle();
-      }
-    }
-
-    void drawPortal() {
-      if (portal) {
-        fill(0);
-        ellipse(x, ballSlot, 50, 50);
-      }
+      ellipse(o.x, o.y, 150, 150);
+      popStyle();
     }
   }
+
+  void drawPortal() {
+    if (portal) {
+      fill(0);
+      ellipse(x, ballSlot, 50, 50);
+    }
+  }
+}

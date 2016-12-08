@@ -1,0 +1,7 @@
+class Spring {
+
+  Spring() {
+    
+  }
+
+}

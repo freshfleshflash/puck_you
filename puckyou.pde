@@ -75,6 +75,7 @@ void draw() {
 
   manageBalls();
   controlBallCreation();
+  //controlBallCreationWithKey();
 
   drawCenterLine();
   convertBooleanToInt();
@@ -100,56 +101,7 @@ void stop() {
   socket2.stop();
 }
 
-int bId = 0;
-
-void websocketOnMessage(WebSocketConnection con, String msg) {
-  wordsStorage.add(msg);
-  for (int i = 0; i < wordsStorage.size(); i++) {
-    println(wordsStorage.get(i) + " ");
-  }
-
-  println(msg.substring(0, 3));
-
-  Player p = (msg.substring(0, 3).equals("[a]")) ? p1 : p2;
-
-  balls.add(new Ball(msg, textWidth(msg), 30, p.x, p.ballSlot, new PVector(p.player * -500, 0), bId++));
-  world.add((balls.get(balls.size() - 1)));
-}
-
-int cId = 0;
-
-void websocketOnOpen(WebSocketConnection con) {
-  println("A client joined ");
-}
-
-void websocketOnClosed(WebSocketConnection con) {
-  println("A client left ");
-}
-
-void renderBordersAndObstacles() {
-  float borderW = 600;
-  float borderH = 20; 
-
-  borders.add(new Border(width/2, borderH, borderW, borderH, 0));
-  borders.add(new Border(width/2, height-borderH, borderW, borderH, 0));
-  borders.add(new Border(borderH, height/2, borderH, borderW, 0));
-  borders.add(new Border(width-borderH, height/2, borderH, borderW, 0));
-
-  borders.add(new Border((width-borderW)/4, (height-borderW)/4, borderH, borderW/2, 75));
-  borders.add(new Border(width - (width-borderW)/4, (height-borderW)/4, borderH, borderW/2, 105));
-  borders.add(new Border((width-borderW)/4, height - (height-borderW)/4, borderH, borderW/2, 105));
-  borders.add(new Border(width - (width-borderW)/4, height - (height-borderW)/4, borderH, borderW/2, 75));
-
-  for (int i = 0; i < borders.size(); i++) {
-    world.add(borders.get(i));
-  }
-
-  for (int i = 0; i < 7; i++) {
-    obstacles.add(new Obstacle(random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
-    world.add(obstacles.get(i));
-  }
-}
-
+// player별로 따로 관리하고 싶으나 socket 연동하려니까 이거 어째..
 void controlBallCreation() {
   if (((arduino.digitalRead(p1.pin_b1) - prePressed1) == 1)) {
     p1.portal = true;
@@ -172,10 +124,74 @@ void controlBallCreation() {
   }
 }
 
+// player별로 따로 관리하고 싶으나 socket 연동하려니까 이거 어째..
+void controlBallCreationWithKey() {
+  if (keyPressed && keyCode == LEFT) {
+    p1.portal = true;
+    socket1.broadcast("start1");
+    prePressed1 = 1;
+  } else { 
+    p1.portal = false;
+    socket1.broadcast("stop1");    
+    prePressed1 = 0;
+  }
 
+  if (keyPressed && keyCode == RIGHT) {
+    p2.portal = true;
+    socket2.broadcast("start2");
+    prePressed2 = 1;
+  } else { 
+    p2.portal = false;
+    socket2.broadcast("stop2");
+    prePressed2 = 0;
+  }
+}
 
+void websocketOnMessage(WebSocketConnection con, String msg) {
+  wordsStorage.add(msg);
+  for (int i = 0; i < wordsStorage.size(); i++) {
+    println(wordsStorage.get(i) + " ");
+  }
 
+  println(msg.substring(0, 3));
 
+  Player p = (msg.substring(0, 3).equals("[a]")) ? p1 : p2;
+
+  balls.add(new Ball(msg, textWidth(msg), 30, p.x, p.ballSlot, new PVector(p.player * -500, 0)));
+  world.add((balls.get(balls.size() - 1)));
+}
+
+void websocketOnOpen(WebSocketConnection con) {
+  println("A client joined ");
+}
+
+void websocketOnClosed(WebSocketConnection con) {
+  println("A client left ");
+}
+
+void renderBordersAndObstacles() {
+  float borderW = 600;
+  //float borderH = 20; 
+
+  //borders.add(new Border(width/2, borderH, borderW, borderH, 0));
+  //borders.add(new Border(width/2, height-borderH, borderW, borderH, 0));
+  //borders.add(new Border(borderH, height/2, borderH, borderW, 0));
+  //borders.add(new Border(width-borderH, height/2, borderH, borderW, 0));
+
+  //borders.add(new Border((width-borderW)/4, (height-borderW)/4, borderH, borderW/2, 75));
+  //borders.add(new Border(width - (width-borderW)/4, (height-borderW)/4, borderH, borderW/2, 105));
+  //borders.add(new Border((width-borderW)/4, height - (height-borderW)/4, borderH, borderW/2, 105));
+  //borders.add(new Border(width - (width-borderW)/4, height - (height-borderW)/4, borderH, borderW/2, 75));
+
+  //for (int i = 0; i < borders.size(); i++) {
+  //  world.add(borders.get(i));
+  //}
+
+  for (int i = 0; i < 7; i++) {
+    obstacles.add(new Obstacle(random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+    world.add(obstacles.get(i));
+  }
+}
 
 void manageBalls() {
   for (int i = 0; i < balls.size(); i++) {
@@ -183,22 +199,7 @@ void manageBalls() {
   }
 }
 
-int bNum = 0;
 void contactEnded(FContact c) {
-
-  //c.getBody2().move();
-
-  //if (wordsStorage.size() > oNum) {
-
-  //  if (c.getBody1().getGroupIndex() == 1 || c.getBody2().getGroupIndex() == 1) {
-  //    //ballMsg += wordsStorage.get(oNum);
-  //    //oNum++;
-  //  }
-  //}
-
-  if (c.getBody1().getGroupIndex() == 1 || c.getBody2().getGroupIndex() == 1) {
-    //balls.remove(bNum++);
-  }
 }
 
 void drawCenterLine() {

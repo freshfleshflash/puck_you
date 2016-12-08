@@ -3,7 +3,7 @@ class Ball extends FBox {
   String msg;
   int id;
 
-  Ball(String msg, float w, float h, float x, float y, PVector velocity, int id) {
+  Ball(String msg, float w, float h, float x, float y, PVector velocity) {
     super(w, h);
     
     this.msg = msg;

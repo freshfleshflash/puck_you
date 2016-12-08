@@ -16,8 +16,6 @@ class Racket extends FSVG {
     this.adjustPosition(0, 190 * dir);
     this.setStroke(0, 0, 0);
     this.setFriction(0);    
-
-    if (player == 1) this.setFill(0);  ////
   }
 
   void rotate_(int level) {    
