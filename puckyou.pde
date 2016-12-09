@@ -1,10 +1,6 @@
 // pins {mic, button1, button2, left, right}
 
-int prePressed1 = 0;
-int prePressed2 = 0;
-
-boolean arduinoOn = true;
-float levelThreshold = 400;
+int oNum = 5;
 
 int[] pins1 = {5, 2, 3, 4, 5};
 int[] pins2 = {0, 8, 9, 10, 11};
@@ -17,12 +13,15 @@ import fisica.*;
 import geomerative.*;
 
 Arduino arduino;
+
 WebSocketP5 socket1, socket2;
+
+int prePressed1 = 0;
+int prePressed2 = 0;
 
 FWorld world;
 
 ArrayList<String> wordsStorage = new ArrayList<String>();
-
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 ArrayList<Ball> balls = new ArrayList<Ball>();
@@ -35,7 +34,7 @@ void setup() {
   smooth();
 
   // arduino
-  if (arduinoOn) setArduino();
+  setArduino();
 
   // socket
   socket1 = new WebSocketP5(this, 8080, "socket1");
@@ -50,8 +49,9 @@ void setup() {
   world.setGravity(0, 0);
   world.setEdges(color(0, 0, 0, 0));
   world.setEdgesFriction(0);
+  world.setEdgesRestitution(1);
 
-  renderBordersAndObstacles();
+  //renderBordersAndObstacles();
 
   // player
   p1 = new Player(pins1, -1);
@@ -65,9 +65,7 @@ void setup() {
 void draw() {
   background(255);
 
-  //println(arduino.digitalRead(8), arduino.digitalRead(9));
-
-  p1.method();
+  //p1.method();
   p2.method();
 
   world.draw();
@@ -75,7 +73,6 @@ void draw() {
 
   manageBalls();
   controlBallCreation();
-  //controlBallCreationWithKey();
 
   drawCenterLine();
   convertBooleanToInt();
@@ -85,10 +82,10 @@ void setArduino() {
   println(Arduino.list());
   arduino = new Arduino(this, Arduino.list()[2], 57600);
 
-  for (int i = 0; i < 3; i++) {
-    arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
-    arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
-  }
+  //for (int i = 0; i < 3; i++) {
+  //  arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
+  //  arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
+  //}
 
   for (int i = 3; i < 5; i++) {
     arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
@@ -147,6 +144,8 @@ void controlBallCreationWithKey() {
   }
 }
 
+int bId = 0;
+
 void websocketOnMessage(WebSocketConnection con, String msg) {
   wordsStorage.add(msg);
   for (int i = 0; i < wordsStorage.size(); i++) {
@@ -187,8 +186,8 @@ void renderBordersAndObstacles() {
   //  world.add(borders.get(i));
   //}
 
-  for (int i = 0; i < 7; i++) {
-    obstacles.add(new Obstacle(random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+  for (int i = 0; i < oNum; i++) {
+    obstacles.add(new Obstacle("VERY", random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(obstacles.get(i));
   }
 }
@@ -200,6 +199,17 @@ void manageBalls() {
 }
 
 void contactEnded(FContact c) {
+  //if(c.getBody1().getGroupIndex() == 0) println(c.getBody1().getName()); 
+  //else if (c.getBody2().getGroupIndex() == 0) println(c.getBody2().getName()); 
+
+  //println(c.getBody1().getX());
+  //if (wordsStorage.size() > oNum) {
+
+  //  if (c.getBody1().getGroupIndex() == 1 || c.getBody2().getGroupIndex() == 1) {
+  //    ballMsg += wordsStorage.get(oNum);
+  //    oNum++;
+  //  }
+  //}
 }
 
 void drawCenterLine() {

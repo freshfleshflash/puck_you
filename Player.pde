@@ -21,7 +21,8 @@ class Player {
 
   int[] levels = new int[30];
 
-  Racket left, right;
+  LeftRacket left;
+  RightRacket right;
 
   Player(int[] pins, int player) {
     this.pin_mic = pins[0];
@@ -34,9 +35,9 @@ class Player {
     this.x = width/2 + xGap * player;
     this.ballSlot = height/2 - ballSlot * player;
 
-    left = new Racket(pins[3], player, -1, x, y);
+    left = new LeftRacket(pin_left, player, 1, x, y);
     world.add(left);
-    right = new Racket(pins[4], player, 1, x, y);
+    right = new RightRacket(pin_right, player, -1, x, y);
     world.add(right);
   }
 
@@ -44,47 +45,56 @@ class Player {
     this.controlWithVoice();
     this.drawPortal();
     this.objectSomething();
+    this.generateTestingBall();
   }
 
   int levelId = 0;
   int realLevel;
+  int defaultCount = 0;
 
-  void controlWithVoice() {    
+  int defaultLevel;
+  boolean defaultSet = false;
+
+  void controlWithVoice() {
     level = arduino.analogRead(pin_mic);
     levels[levelId++] = level;
-    //if (pin_mic == 0) printArray(levels); ////
     if (levelId == levels.length) levelId = 0;
-
     int sum = 0;
     for (int i = 0; i < levels.length; i++) sum += levels[i];
     realLevel = (int)sum / levels.length;
 
-    if (pin_mic == 0) println(realLevel, level);
-    
-    if(arduino.digitalRead(pin_b2) == 1){  
-    left.rotate_(realLevel);
-    right.rotate_(realLevel);
+    if (!defaultSet) {
+      defaultLevel = realLevel;     
+      defaultCount++;
+      if (defaultCount > 100) defaultSet = true;
     }
+
+    realLevel = constrain(-realLevel + defaultLevel, 0, 180);
+
+    left.rotate_(realLevel); // 0이 들어간다 
+    right.rotate_(realLevel);
   }
 
+  int hmm = 0;
+
   void objectSomething() {
-    Obstacle o = obstacles.get(0);
-
-    //if (keyPressed) {
-    if (arduino.digitalRead(pin_b2) == 1) {      
-      pushStyle();
-      noStroke();
-      fill(255, 0, 0);
-
-      ellipse(o.x, o.y, 150, 150);
-      popStyle();
-    }
   }
 
   void drawPortal() {
     if (portal) {
       fill(0);
       ellipse(x, ballSlot, 50, 50);
+    }
+  }
+
+  boolean testing = false;
+
+  void generateTestingBall() {
+    if (keyPressed && !testing) {
+      //String msg, float w, float h, float x, float y, PVector velocity
+      balls.add(new Ball("hello", 50, 50, x, ballSlot, new PVector(player * -500, 0)));
+      world.add((balls.get(balls.size() - 1)));
+      testing = true;
     }
   }
 }
