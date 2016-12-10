@@ -92,7 +92,7 @@ class Player {
     if (keyPressed && keyCode == ENTER) {
       String msg = "시발";
 
-      wordsStorage.add(msg);
+      //wordsStorage.append(msg);
       balls.add(new Ball(bId++, x, ballSlot, new PVector(player * -300, 0)));
       world.add((balls.get(balls.size() - 1)));
     }

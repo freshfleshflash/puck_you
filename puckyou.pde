@@ -19,7 +19,7 @@ int prePressed2 = 0;
 
 FWorld world;
 
-ArrayList<String> wordsStorage = new ArrayList<String>();
+ArrayList<String[]> wordsStorage = new ArrayList<String[]>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
@@ -150,7 +150,8 @@ void controlBallCreationWithKey() {
 
 int bId = 0;
 void websocketOnMessage(WebSocketConnection con, String msg) {
-  wordsStorage.add(split(msg, ']')[1]);
+  String[] inputMsg = {split(msg, ']')[1]};
+  wordsStorage.add(inputMsg);
   for (int i = 0; i < wordsStorage.size(); i++) {
     println(wordsStorage.get(i) + " ");
   }
@@ -195,7 +196,7 @@ void renderObstacles() {
   blackObstacles.add(new BlackObstacle());
 
   float borderW = 600;
-  for (int i = 1; i <= 3; i++) {
+  for (int i = 1; i <= 1; i++) {
     obstacles.add(new Obstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(obstacles.get(i));
   }
@@ -216,16 +217,17 @@ void contactEnded(FContact c) {
   if ((c.getBody1().getGroupIndex() < 0) || (c.getBody2().getGroupIndex() < 0)) {
     int bId = (c.getBody2().getGroupIndex() < 0) ? c.getBody1().getGroupIndex() : c.getBody2().getGroupIndex(); 
     int oId = (c.getBody2().getGroupIndex() < 0) ? c.getBody2().getGroupIndex() : c.getBody1().getGroupIndex(); 
-   
-    String pre = wordsStorage.get(bId);
-    
+
+    String[] pre = wordsStorage.get(bId);
+
     if (oId > -100) {
-      String plus = oWordsStorage[-oId];
-      if (pre.length() < 7*3) wordsStorage.set(bId, pre + plus);
+      String[] plus = {oWordsStorage[-oId]};
+      if (pre.length < 4) wordsStorage.set(bId, concat(pre, plus));
     } else {
-      println(wordsStorage.size());
-      
-      //wordsStorage.set(bId, wordsStorage.get());
+      if (pre.length != 0) {
+        wordsStorage.set(bId, subset(pre, 1));
+        //wordsStorage.set(bId, shorten(pre));
+      }
     }
   }
 }

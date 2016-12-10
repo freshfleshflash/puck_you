@@ -22,8 +22,13 @@ class Ball extends FCircle {
 
   void moveText() {   
     textAlign(CENTER, TOP);
-
-    msg = wordsStorage.get(id);
+    
+    msg = "";
+    
+    for(int i = 0; i < wordsStorage.get(id).length; i++) {
+      msg += wordsStorage.get(id)[i];
+    }
+    
     while (msg.length() < 7) {
       msg += 'ㅗ';
     }
