@@ -12,12 +12,11 @@ class BlackObstacle extends FCircle {
     this.x = x;
     this.y = y;
 
-    this.setGroupIndex(-id);
+    this.setGroupIndex(-id * 100);
     this.setPosition(x, y);
     this.setStatic(true);
-    this.setNoFill();
+    this.setFill(0);
     this.setFriction(0);
-
     this.setRestitution(1);
   }
 }

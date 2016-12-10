@@ -89,7 +89,7 @@ class Player {
 
   int bId = 0;
   void generateTestingBall() {
-    if (keyPressed) {
+    if (keyPressed && keyCode == ENTER) {
       String msg = "시발";
 
       wordsStorage.add(msg);

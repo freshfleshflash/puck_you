@@ -1,6 +1,5 @@
 // pins {mic, button1, button2, left, right}
 
-
 int[] pins1 = {5, 2, 3, 4, 5};
 int[] pins2 = {0, 8, 9, 10, 11};
 
@@ -23,7 +22,7 @@ FWorld world;
 ArrayList<String> wordsStorage = new ArrayList<String>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-//ArrayList<String> oWordsStorage = new ArrayList<String>();
+ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
 String[] oWordsStorage = {"", "정말로", "이런", "아오"}; 
 ArrayList<Ball> balls = new ArrayList<Ball>();
 
@@ -77,6 +76,7 @@ void draw() {
 
   manageBalls();
   //controlBallCreation();
+  controlBallCreationWithKey();
 
   //drawCenterLine();
   //convertBooleanToInt();
@@ -150,7 +150,7 @@ void controlBallCreationWithKey() {
 
 int bId = 0;
 void websocketOnMessage(WebSocketConnection con, String msg) {
-  wordsStorage.add(msg);
+  wordsStorage.add(split(msg, ']')[1]);
   for (int i = 0; i < wordsStorage.size(); i++) {
     println(wordsStorage.get(i) + " ");
   }
@@ -192,11 +192,17 @@ void renderBorders() {
 
 void renderObstacles() {
   obstacles.add(new Obstacle());
-  
+  blackObstacles.add(new BlackObstacle());
+
   float borderW = 600;
   for (int i = 1; i <= 3; i++) {
     obstacles.add(new Obstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(obstacles.get(i));
+  }
+
+  for (int i = 1; i <= 3; i++) {
+    blackObstacles.add(new BlackObstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+    world.add(blackObstacles.get(i));
   }
 }
 
@@ -207,15 +213,20 @@ void manageBalls() {
 }
 
 void contactEnded(FContact c) {
-  println(c.getBody1().getGroupIndex(), c.getBody2().getGroupIndex());
-
-  if ((c.getBody1().getGroupIndex() < 0) || c.getBody2().getGroupIndex() < 0) {
+  if ((c.getBody1().getGroupIndex() < 0) || (c.getBody2().getGroupIndex() < 0)) {
     int bId = (c.getBody2().getGroupIndex() < 0) ? c.getBody1().getGroupIndex() : c.getBody2().getGroupIndex(); 
     int oId = (c.getBody2().getGroupIndex() < 0) ? c.getBody2().getGroupIndex() : c.getBody1().getGroupIndex(); 
+   
+    String pre = wordsStorage.get(bId);
     
-    println(bId, wordsStorage.get(bId)); 
-    String plus = oWordsStorage[-oId];
-    wordsStorage.set(bId, wordsStorage.get(bId) + plus);
+    if (oId > -100) {
+      String plus = oWordsStorage[-oId];
+      if (pre.length() < 7*3) wordsStorage.set(bId, pre + plus);
+    } else {
+      println(wordsStorage.size());
+      
+      //wordsStorage.set(bId, wordsStorage.get());
+    }
   }
 }
 

@@ -1,8 +1,8 @@
 class Ball extends FCircle {
-  
+
   int id;
   String msg;
-  float size = 100;
+  float size = 200;
 
   Ball(int id, float x, float y, PVector velocity) {
     super(100);
@@ -16,33 +16,34 @@ class Ball extends FCircle {
     this.setFriction(0);
     //this.addTorque(10);
     this.setDamping(0);
-    this.setNoStroke();
+    //this.setNoStroke();
+    this.setNoFill();
   }
 
   void moveText() {   
     textAlign(CENTER, TOP);
-    
+
     msg = wordsStorage.get(id);
     while (msg.length() < 7) {
       msg += 'ㅗ';
     }
-  
-    float r = size / 2;
-    float ts = (int)r / 2;
-    textSize(ts);
 
     pushMatrix();
     translate(this.getX(), this.getY());
-    //noFill();
-    //noStroke();
-    //ellipse(0, 0, r*2, r*2);
-
+    
+    float r;
+    float ts;
     float arclength = 0;
+    
     for (int i = 0; i < msg.length(); i++) {   
+      r = size / pow(2, ((int)i/7) + 1);
+      ts = r / 2;
+
+      textSize(ts);
       char currentChar = msg.charAt(i);
 
       float w = textWidth(currentChar);
-      arclength += w/1;
+      arclength += w;
 
       float theta = PI + arclength / r;    
 
@@ -53,7 +54,7 @@ class Ball extends FCircle {
       text(currentChar, 0, 0);
       popMatrix();
 
-      arclength += w/1;
+      arclength += w;
     }
 
     popMatrix();
