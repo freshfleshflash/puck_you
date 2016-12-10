@@ -1,15 +1,14 @@
-class Obstacle extends FCircle {
-  float x, y;
-  //int id;  
+class BlackObstacle extends FCircle {
 
-  Obstacle() {
+  float x, y;
+
+  BlackObstacle() {
     super(0);
   }
 
-  Obstacle(int id, float x, float y) {
+  BlackObstacle(int id, float x, float y) {
     super(100);
 
-    //this.id = id;
     this.x = x;
     this.y = y;
 

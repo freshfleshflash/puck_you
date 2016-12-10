@@ -42,7 +42,7 @@ class Player {
   }
 
   void method() {
-    this.controlWithVoice();
+    //this.controlWithVoice();
     this.drawPortal();
     this.objectSomething();
     this.generateTestingBall();
@@ -87,14 +87,14 @@ class Player {
     }
   }
 
-  boolean testing = false;
-
+  int bId = 0;
   void generateTestingBall() {
-    if (keyPressed && !testing) {
-      //String msg, float w, float h, float x, float y, PVector velocity
-      balls.add(new Ball("hello", 50, 50, x, ballSlot, new PVector(player * -500, 0)));
+    if (keyPressed) {
+      String msg = "시발";
+
+      wordsStorage.add(msg);
+      balls.add(new Ball(bId++, x, ballSlot, new PVector(player * -300, 0)));
       world.add((balls.get(balls.size() - 1)));
-      testing = true;
     }
   }
 }

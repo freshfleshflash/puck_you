@@ -1,57 +1,59 @@
-class Ball extends FBox {
-
-  String msg;
+class Ball extends FCircle {
+  
   int id;
+  String msg;
+  float size = 100;
 
-  Ball(String msg, float w, float h, float x, float y, PVector velocity) {
-    super(w, h);
+  Ball(int id, float x, float y, PVector velocity) {
+    super(100);
 
-    this.msg = msg;
+    this.id = id;
 
+    this.setGroupIndex(id);
     this.setPosition(x, y);
-    this.setRestitution(2);  
+    this.setRestitution(1);  
     this.setVelocity(velocity.x, velocity.y);
     this.setFriction(0);
-    this.addTorque(50);
+    //this.addTorque(10);
     this.setDamping(0);
-
-    this.setNoFill();
-    //this.setNoStroke();
-    this.setGroupIndex(0);
+    this.setNoStroke();
   }
 
-  float size;
-  void move() {
-    pushMatrix();
-    translate(this.getX(), this.getY());
-    rotate(this.getRotation());
-
-    while (sqrt(msg.length()) != (int)sqrt(msg.length())) {
+  void moveText() {   
+    textAlign(CENTER, TOP);
+    
+    msg = wordsStorage.get(id);
+    while (msg.length() < 7) {
       msg += 'ㅗ';
     }
+  
+    float r = size / 2;
+    float ts = (int)r / 2;
+    textSize(ts);
 
-    size = sqrt(msg.length());
-    noFill();
-    rect(0, 0, size*20, size*20);
+    pushMatrix();
+    translate(this.getX(), this.getY());
+    //noFill();
+    //noStroke();
+    //ellipse(0, 0, r*2, r*2);
 
-    int i = 0;
-    int j = 0;
+    float arclength = 0;
+    for (int i = 0; i < msg.length(); i++) {   
+      char currentChar = msg.charAt(i);
 
-    for (int id = 0; id < msg.length(); id++) {
-      pushMatrix();
-      translate(i * 20, j * 20);
-      //rotate(PI/4);
+      float w = textWidth(currentChar);
+      arclength += w/1;
+
+      float theta = PI + arclength / r;    
+
+      pushMatrix();  
+      translate(r*cos(theta), r*sin(theta));
+      rotate(theta+PI/2); 
       fill(0);
-      textAlign(LEFT, TOP);
-      text(msg.charAt(id), 0, 0);
+      text(currentChar, 0, 0);
       popMatrix();
 
-      i++;
-
-      if (i == size) {
-        i = 0; 
-        j++;
-      }
+      arclength += w/1;
     }
 
     popMatrix();

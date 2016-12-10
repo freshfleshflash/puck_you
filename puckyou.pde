@@ -1,6 +1,5 @@
 // pins {mic, button1, button2, left, right}
 
-int oNum = 5;
 
 int[] pins1 = {5, 2, 3, 4, 5};
 int[] pins2 = {0, 8, 9, 10, 11};
@@ -24,6 +23,8 @@ FWorld world;
 ArrayList<String> wordsStorage = new ArrayList<String>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
+//ArrayList<String> oWordsStorage = new ArrayList<String>();
+String[] oWordsStorage = {"", "정말로", "이런", "아오"}; 
 ArrayList<Ball> balls = new ArrayList<Ball>();
 
 Player p1, p2;
@@ -33,8 +34,10 @@ void setup() {
   size(displayWidth, displayHeight);
   smooth();
 
+  println(width, height);
+
   // arduino
-  setArduino();
+  //setArduino();
 
   // socket
   socket1 = new WebSocketP5(this, 8080, "socket1");
@@ -51,7 +54,8 @@ void setup() {
   world.setEdgesFriction(0);
   world.setEdgesRestitution(1);
 
-  //renderBordersAndObstacles();
+  renderBorders();
+  renderObstacles();
 
   // player
   p1 = new Player(pins1, -1);
@@ -72,10 +76,10 @@ void draw() {
   world.step();
 
   manageBalls();
-  controlBallCreation();
+  //controlBallCreation();
 
-  drawCenterLine();
-  convertBooleanToInt();
+  //drawCenterLine();
+  //convertBooleanToInt();
 }
 
 void setArduino() {
@@ -145,7 +149,6 @@ void controlBallCreationWithKey() {
 }
 
 int bId = 0;
-
 void websocketOnMessage(WebSocketConnection con, String msg) {
   wordsStorage.add(msg);
   for (int i = 0; i < wordsStorage.size(); i++) {
@@ -156,7 +159,7 @@ void websocketOnMessage(WebSocketConnection con, String msg) {
 
   Player p = (msg.substring(0, 3).equals("[a]")) ? p1 : p2;
 
-  balls.add(new Ball(msg, textWidth(msg), 30, p.x, p.ballSlot, new PVector(p.player * -500, 0)));
+  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -500, 0)));
   world.add((balls.get(balls.size() - 1)));
 }
 
@@ -168,8 +171,8 @@ void websocketOnClosed(WebSocketConnection con) {
   println("A client left ");
 }
 
-void renderBordersAndObstacles() {
-  float borderW = 600;
+void renderBorders() {
+  //float borderW = 600;
   //float borderH = 20; 
 
   //borders.add(new Border(width/2, borderH, borderW, borderH, 0));
@@ -185,31 +188,35 @@ void renderBordersAndObstacles() {
   //for (int i = 0; i < borders.size(); i++) {
   //  world.add(borders.get(i));
   //}
+}
 
-  for (int i = 0; i < oNum; i++) {
-    obstacles.add(new Obstacle("VERY", random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+void renderObstacles() {
+  obstacles.add(new Obstacle());
+  
+  float borderW = 600;
+  for (int i = 1; i <= 3; i++) {
+    obstacles.add(new Obstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(obstacles.get(i));
   }
 }
 
 void manageBalls() {
   for (int i = 0; i < balls.size(); i++) {
-    balls.get(i).move();
+    balls.get(i).moveText();
   }
 }
 
 void contactEnded(FContact c) {
-  //if(c.getBody1().getGroupIndex() == 0) println(c.getBody1().getName()); 
-  //else if (c.getBody2().getGroupIndex() == 0) println(c.getBody2().getName()); 
+  println(c.getBody1().getGroupIndex(), c.getBody2().getGroupIndex());
 
-  //println(c.getBody1().getX());
-  //if (wordsStorage.size() > oNum) {
-
-  //  if (c.getBody1().getGroupIndex() == 1 || c.getBody2().getGroupIndex() == 1) {
-  //    ballMsg += wordsStorage.get(oNum);
-  //    oNum++;
-  //  }
-  //}
+  if ((c.getBody1().getGroupIndex() < 0) || c.getBody2().getGroupIndex() < 0) {
+    int bId = (c.getBody2().getGroupIndex() < 0) ? c.getBody1().getGroupIndex() : c.getBody2().getGroupIndex(); 
+    int oId = (c.getBody2().getGroupIndex() < 0) ? c.getBody2().getGroupIndex() : c.getBody1().getGroupIndex(); 
+    
+    println(bId, wordsStorage.get(bId)); 
+    String plus = oWordsStorage[-oId];
+    wordsStorage.set(bId, wordsStorage.get(bId) + plus);
+  }
 }
 
 void drawCenterLine() {
