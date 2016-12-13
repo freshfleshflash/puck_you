@@ -19,7 +19,7 @@ int prePressed2 = 0;
 
 FWorld world;
 
-ArrayList<String[]> wordsStorage = new ArrayList<String[]>();
+//ArrayList<String[]> wordsStorage = new ArrayList<String[]>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
@@ -36,7 +36,7 @@ void setup() {
   println(width, height);
 
   // arduino
-  //setArduino();
+  setArduino();
 
   // socket
   socket1 = new WebSocketP5(this, 8080, "socket1");
@@ -68,7 +68,7 @@ void setup() {
 void draw() {
   background(255);
 
-  //p1.method();
+  p1.method();
   p2.method();
 
   world.draw();
@@ -86,10 +86,12 @@ void setArduino() {
   println(Arduino.list());
   arduino = new Arduino(this, Arduino.list()[2], 57600);
 
-  //for (int i = 0; i < 3; i++) {
-  //  arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
-  //  arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
-  //}
+  for (int i = 0; i < 3; i++) {
+    arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
+    arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
+  }
+
+  arduino.pinMode(0, Arduino.INPUT);
 
   for (int i = 3; i < 5; i++) {
     arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
@@ -151,16 +153,16 @@ void controlBallCreationWithKey() {
 int bId = 0;
 void websocketOnMessage(WebSocketConnection con, String msg) {
   String[] inputMsg = {split(msg, ']')[1]};
-  wordsStorage.add(inputMsg);
-  for (int i = 0; i < wordsStorage.size(); i++) {
-    println(wordsStorage.get(i) + " ");
-  }
+  //wordsStorage.add(inputMsg);
+  //for (int i = 0; i < wordsStorage.size(); i++) {
+  //  println(wordsStorage.get(i) + " ");
+  //}
 
   println(msg.substring(0, 3));
 
   Player p = (msg.substring(0, 3).equals("[a]")) ? p1 : p2;
 
-  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -500, 0)));
+  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -500, 0), msg));
   world.add((balls.get(balls.size() - 1)));
 }
 
@@ -173,22 +175,15 @@ void websocketOnClosed(WebSocketConnection con) {
 }
 
 void renderBorders() {
-  //float borderW = 600;
-  //float borderH = 20; 
+  float borderW = 600;
+  float borderH = 20; 
 
-  //borders.add(new Border(width/2, borderH, borderW, borderH, 0));
-  //borders.add(new Border(width/2, height-borderH, borderW, borderH, 0));
-  //borders.add(new Border(borderH, height/2, borderH, borderW, 0));
-  //borders.add(new Border(width-borderH, height/2, borderH, borderW, 0));
+  borders.add(new Border(0, height/2, borderH, borderW, -1001));
+  borders.add(new Border(width, height/2, borderH, borderW, -1002));
 
-  //borders.add(new Border((width-borderW)/4, (height-borderW)/4, borderH, borderW/2, 75));
-  //borders.add(new Border(width - (width-borderW)/4, (height-borderW)/4, borderH, borderW/2, 105));
-  //borders.add(new Border((width-borderW)/4, height - (height-borderW)/4, borderH, borderW/2, 105));
-  //borders.add(new Border(width - (width-borderW)/4, height - (height-borderW)/4, borderH, borderW/2, 75));
-
-  //for (int i = 0; i < borders.size(); i++) {
-  //  world.add(borders.get(i));
-  //}
+  for (int i = 0; i < borders.size(); i++) {
+    world.add(borders.get(i));
+  }
 }
 
 void renderObstacles() {
@@ -209,25 +204,61 @@ void renderObstacles() {
 
 void manageBalls() {
   for (int i = 0; i < balls.size(); i++) {
-    balls.get(i).moveText();
+    if (balls.get(i) != null) {
+      balls.get(i).moveText();
+    }
   }
 }
 
+// 가서 부딪치는 애(공)가 getBody2() 임 
+
 void contactEnded(FContact c) {
-  if ((c.getBody1().getGroupIndex() < 0) || (c.getBody2().getGroupIndex() < 0)) {
-    int bId = (c.getBody2().getGroupIndex() < 0) ? c.getBody1().getGroupIndex() : c.getBody2().getGroupIndex(); 
-    int oId = (c.getBody2().getGroupIndex() < 0) ? c.getBody2().getGroupIndex() : c.getBody1().getGroupIndex(); 
+  int cId = c.getBody1().getGroupIndex();
+  int bId = c.getBody2().getGroupIndex();
 
-    String[] pre = wordsStorage.get(bId);
+  if ((cId < 0) && cId > -1000) {
+    //String[] pre = wordsStorage.get(bId);
+    int occupied = balls.get(bId).msgStorage.size();
+    println(occupied);
 
-    if (oId > -100) {
-      String[] plus = {oWordsStorage[-oId]};
-      if (pre.length < 4) wordsStorage.set(bId, concat(pre, plus));
-    } else {
-      if (pre.length != 0) {
-        wordsStorage.set(bId, subset(pre, 1));
-        //wordsStorage.set(bId, shorten(pre));
+    if (cId > -100) {
+      //String[] plus = {oWordsStorage[-cId]};
+      if (occupied < 4) balls.get(bId).msgStorage.add(oWordsStorage[-cId]);
+    } else { // black obstacle
+      if (occupied != 0) {
+        balls.get(bId).msgStorage.remove(balls.get(bId).msgStorage.size() - 1);
+      } else {
+        println("no!");
       }
+    }
+  }
+
+  //if ((cId < 0) && cId > -1000) {
+  //  String[] pre = wordsStorage.get(bId);
+
+  //  if (cId > -100) {
+  //    String[] plus = {oWordsStorage[-cId]};
+  //    if (pre.length < 4) wordsStorage.set(bId, concat(pre, plus));
+  //  } else {
+  //    if (pre.length != 0) {
+  //      wordsStorage.set(bId, subset(pre, 1));
+  //    }
+  //  }
+  //}
+
+  if ((cId == -1001) || (cId == -1002)) {   
+    //balls.set(bId, null);
+    //wordsStorage.set(bId, null);
+    //balls.remove(bId);
+    //wordsStorage.remove(bId);
+
+    if (cId == -1001) {
+      p1.score++;
+
+      println(p1.score, p2.score);
+    } else if (cId == -1002) {
+      p2.score++; 
+      println(p1.score, p2.score);
     }
   }
 }

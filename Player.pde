@@ -1,7 +1,7 @@
 // pins {mic, button1, button2, left, right}
 
 class Player {
-
+  
   int pin_mic;
   int pin_b1;
   int pin_b2;
@@ -23,7 +23,9 @@ class Player {
 
   LeftRacket left;
   RightRacket right;
-
+  
+  int score = 0;
+  
   Player(int[] pins, int player) {
     this.pin_mic = pins[0];
     this.pin_b1 = pins[1];
@@ -42,10 +44,11 @@ class Player {
   }
 
   void method() {
-    //this.controlWithVoice();
+    this.controlWithVoice();
     this.drawPortal();
     this.objectSomething();
-    this.generateTestingBall();
+    if(player == -1) this.generateTestingBall();
+    detectWin();
   }
 
   int levelId = 0;
@@ -56,7 +59,9 @@ class Player {
   boolean defaultSet = false;
 
   void controlWithVoice() {
+
     level = arduino.analogRead(pin_mic);
+
     levels[levelId++] = level;
     if (levelId == levels.length) levelId = 0;
     int sum = 0;
@@ -70,6 +75,8 @@ class Player {
     }
 
     realLevel = constrain(-realLevel + defaultLevel, 0, 180);
+
+    //println(realLevel);
 
     left.rotate_(realLevel); // 0이 들어간다 
     right.rotate_(realLevel);
@@ -89,12 +96,20 @@ class Player {
 
   int bId = 0;
   void generateTestingBall() {
-    if (keyPressed && keyCode == ENTER) {
-      String msg = "시발";
+    if (keyPressed && key == ENTER) {
+      //String[] msg = {"시발"};
 
-      //wordsStorage.append(msg);
-      balls.add(new Ball(bId++, x, ballSlot, new PVector(player * -300, 0)));
+      //wordsStorage.add(msg);
+      balls.add(new Ball(bId++, x, ballSlot, new PVector(player * -500, 0), "슈발"));
       world.add((balls.get(balls.size() - 1)));
+    }
+  }
+  
+  
+  void detectWin() {
+    String msg = "";
+    if(this.score >= 5) {
+      text("WIN", x, y);  
     }
   }
 }

@@ -2,7 +2,6 @@ class LeftRacket extends FSVG {
 
   int pin, player, dir;
 
-  float test;
 
   LeftRacket(int pin, int player, int dir, float px, float py) {
     super("handle.svg", player, dir);
@@ -21,6 +20,7 @@ class LeftRacket extends FSVG {
   }
 
   
+  int testLevel = 0;
   void rotate_(int level) {        
     //println("left ", level);   
     //level = 180;
