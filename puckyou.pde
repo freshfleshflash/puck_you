@@ -19,7 +19,6 @@ int prePressed2 = 0;
 
 FWorld world;
 
-//ArrayList<String[]> wordsStorage = new ArrayList<String[]>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
@@ -152,17 +151,9 @@ void controlBallCreationWithKey() {
 
 int bId = 0;
 void websocketOnMessage(WebSocketConnection con, String msg) {
-  String[] inputMsg = {split(msg, ']')[1]};
-  //wordsStorage.add(inputMsg);
-  //for (int i = 0; i < wordsStorage.size(); i++) {
-  //  println(wordsStorage.get(i) + " ");
-  //}
-
-  println(msg.substring(0, 3));
-
   Player p = (msg.substring(0, 3).equals("[a]")) ? p1 : p2;
 
-  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -500, 0), msg));
+  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -500, 0), split(msg, ']')[1]));
   world.add((balls.get(balls.size() - 1)));
 }
 
@@ -217,49 +208,38 @@ void contactEnded(FContact c) {
   int bId = c.getBody2().getGroupIndex();
 
   if ((cId < 0) && cId > -1000) {
-    //String[] pre = wordsStorage.get(bId);
     int occupied = balls.get(bId).msgStorage.size();
     println(occupied);
 
     if (cId > -100) {
-      //String[] plus = {oWordsStorage[-cId]};
       if (occupied < 4) balls.get(bId).msgStorage.add(oWordsStorage[-cId]);
     } else { // black obstacle
       if (occupied != 0) {
         balls.get(bId).msgStorage.remove(balls.get(bId).msgStorage.size() - 1);
-      } else {
-        println("no!");
+      } else {     
+        balls.get(bId).disappeared = true;
+        world.remove(balls.get(bId));
       }
     }
   }
 
-  //if ((cId < 0) && cId > -1000) {
-  //  String[] pre = wordsStorage.get(bId);
+  if ((cId == -1001) || (cId == -1002)) {  
+    balls.get(bId).disappeared = true;
 
-  //  if (cId > -100) {
-  //    String[] plus = {oWordsStorage[-cId]};
-  //    if (pre.length < 4) wordsStorage.set(bId, concat(pre, plus));
-  //  } else {
-  //    if (pre.length != 0) {
-  //      wordsStorage.set(bId, subset(pre, 1));
-  //    }
-  //  }
-  //}
-
-  if ((cId == -1001) || (cId == -1002)) {   
-    //balls.set(bId, null);
-    //wordsStorage.set(bId, null);
-    //balls.remove(bId);
-    //wordsStorage.remove(bId);
+    String loserWords = "";
+    for (int i = 0; i < balls.get(bId).msgStorage.size(); i++) {
+      loserWords += balls.get(bId).msgStorage.get(i);
+    }
 
     if (cId == -1001) {
-      p1.score++;
-
-      println(p1.score, p2.score);
+      p1.score--;
+      p1.loserStorage.add(loserWords);
     } else if (cId == -1002) {
-      p2.score++; 
-      println(p1.score, p2.score);
+      p2.score--;
+      p1.loserStorage.add(loserWords);
     }
+
+    world.remove(balls.get(bId));
   }
 }
 
@@ -273,4 +253,14 @@ int pressed = 0;
 void convertBooleanToInt() {
   if (keyPressed) pressed = 1;
   else pressed = 0;
+}
+
+String sumString(ArrayList<String> arrListString) {
+  String sum = "";
+  
+  for(int i = 0; i < arrListString.size(); i++) {
+    sum += arrListString.get(i);
+  }
+  
+  return sum;
 }

@@ -25,6 +25,7 @@ class Player {
   RightRacket right;
   
   int score = 0;
+  ArrayList<String> loserStorage = new ArrayList<String>();
   
   Player(int[] pins, int player) {
     this.pin_mic = pins[0];
@@ -107,9 +108,8 @@ class Player {
   
   
   void detectWin() {
-    String msg = "";
-    if(this.score >= 5) {
-      text("WIN", x, y);  
+    if(this.score <= -5) {
+      text(sumString(loserStorage), x, y);  
     }
   }
 }
