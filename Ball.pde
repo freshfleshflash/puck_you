@@ -1,12 +1,12 @@
 class Ball extends FCircle {
 
   int id;
-  float size = 100;
+  float size = 50;
   ArrayList<String> msgStorage = new ArrayList<String>();
   boolean disappeared = false;
 
   Ball(int id, float x, float y, PVector velocity, String msg) {
-    super(100);
+    super(40);
 
     this.id = id;
     this.msgStorage.add(msg);
@@ -18,7 +18,7 @@ class Ball extends FCircle {
     this.setFriction(0);
     //this.addTorque(10);
     this.setDamping(0);
-    this.setNoStroke();
+    //this.setNoStroke();
     this.setNoFill();
     this.setAllowSleeping(false);
   }
@@ -60,7 +60,7 @@ class Ball extends FCircle {
         translate(r*cos(theta), r*sin(theta));
         rotate(theta+PI/2); 
         fill(0);
-        text(currentChar, 0, 0);
+        //text(currentChar, 0, 0);
         popMatrix();
 
         arclength += w;

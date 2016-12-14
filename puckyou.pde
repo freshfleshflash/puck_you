@@ -9,6 +9,11 @@ import muthesius.net.*;
 import org.webbitserver.*;
 import fisica.*;
 import geomerative.*;
+import processing.video.*;
+import jp.nyatla.nyar4psg.*;
+
+Capture cam;
+MultiMarker nya;
 
 Arduino arduino;
 
@@ -28,11 +33,31 @@ ArrayList<Ball> balls = new ArrayList<Ball>();
 Player p1, p2;
 PFont font;
 
+PImage bg;
+
+Physical ppp;
+
+//ArrayList<Physical> ppp = new ArrayList<Physical>();
+
+
 void setup() {
-  size(displayWidth, displayHeight);
+  size(1280, 640);
   smooth();
 
-  println(width, height);
+  frameRate(60);
+
+  bg = loadImage("totalbg.jpg");
+
+  cam=new Capture(this, width, height);
+  nya=new MultiMarker(this, width, height, "camera_para.dat", NyAR4PsgConfig.CONFIG_PSG);
+  nya.addARMarker("patt.hiro", 80);//id=0
+  cam.start();
+
+
+
+
+
+
 
   // arduino
   setArduino();
@@ -53,7 +78,11 @@ void setup() {
   world.setEdgesRestitution(1);
 
   renderBorders();
-  renderObstacles();
+  //renderObstacles();
+  
+  ppp = new Physical();
+  world.add(ppp);
+
 
   // player
   p1 = new Player(pins1, -1);
@@ -64,8 +93,29 @@ void setup() {
   textFont(font);
 }
 
+
+
+
+
+int c=0;
+
 void draw() {
-  background(255);
+
+
+  c++;
+  if (cam.available() !=true) {
+    return;
+  }
+  cam.read();
+  nya.detect(cam);
+
+  image(bg, 0, 0);
+
+
+
+
+
+
 
   p1.method();
   p2.method();
@@ -79,6 +129,17 @@ void draw() {
 
   //drawCenterLine();
   //convertBooleanToInt();
+
+
+
+
+
+  fill(255);
+  rect(nya.getMarkerVertex2D(0)[0].x, nya.getMarkerVertex2D(0)[0].y, 100, 100);
+  
+  
+  ppp.setPosition(nya.getMarkerVertex2D(0)[0].x, nya.getMarkerVertex2D(0)[0].y);
+  
 }
 
 void setArduino() {
@@ -175,6 +236,12 @@ void renderBorders() {
   for (int i = 0; i < borders.size(); i++) {
     world.add(borders.get(i));
   }
+
+
+
+
+
+  //world.add(new FLine(0, 0, width, height));
 }
 
 void renderObstacles() {
@@ -257,10 +324,10 @@ void convertBooleanToInt() {
 
 String sumString(ArrayList<String> arrListString) {
   String sum = "";
-  
-  for(int i = 0; i < arrListString.size(); i++) {
+
+  for (int i = 0; i < arrListString.size(); i++) {
     sum += arrListString.get(i);
   }
-  
+
   return sum;
 }

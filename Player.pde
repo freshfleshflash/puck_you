@@ -14,7 +14,7 @@ class Player {
   float y = height/2;
   int level;
   int preLevel = 0;
-  float ballSlot = 300;
+  float ballSlot = -300;
   int prePressed = 0;
 
   boolean portal = false;
@@ -48,7 +48,7 @@ class Player {
     this.controlWithVoice();
     this.drawPortal();
     this.objectSomething();
-    if(player == -1) this.generateTestingBall();
+    if(player == 1) this.generateTestingBall();
     detectWin();
   }
 
@@ -101,7 +101,7 @@ class Player {
       //String[] msg = {"시발"};
 
       //wordsStorage.add(msg);
-      balls.add(new Ball(bId++, x, ballSlot, new PVector(player * -500, 0), "슈발"));
+      balls.add(new Ball(bId++, width/2,height/2, new PVector(player * random(300, 500), random(300, 500)), "슈발"));
       world.add((balls.get(balls.size() - 1)));
     }
   }

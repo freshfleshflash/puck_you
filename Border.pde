@@ -11,7 +11,7 @@ class Border extends FBox {
     this.setFriction(0);
     this.setNoStroke();
     this.setDensity(10);
-    this.setFill(100);
+    this.setNoFill();
     
     this.setRestitution(1); 
   }

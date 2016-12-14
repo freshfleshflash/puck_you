@@ -1,17 +1,13 @@
-class FSVG extends FPoly {
+class FSVGBorder extends FPoly {
   RShape m_shape;
 
-  float w = 144.28*1;
-  float h = 46.28*1;  
-  float axisTranslation = 24;
-  float defaultAng = 0;
+  float w = 1280;
+  float h = 640;  
 
-  FSVG(int player, int dir) {
+  FSVGBorder() {
     super();
-    
-    this.setFill(229, 71, 70);
-       
-    RShape fullSvg = RG.loadShape("racket.svg");
+
+    RShape fullSvg = RG.loadShape("border.svg");
     m_shape = fullSvg.getChild("object");
     RShape outline = fullSvg.getChild("outline");
 
@@ -20,14 +16,8 @@ class FSVG extends FPoly {
       return;
     }
 
-    m_shape.transform(-axisTranslation, -h/2, w, h); 
-    outline.transform(-axisTranslation, -h/2, w, h); 
-
-//    m_shape.rotate(radians(defaultAng * dir)); 
-//    outline.rotate(radians(defaultAng * dir)); 
-
-    m_shape.scale(player, 1);
-    outline.scale(player, 1);
+    m_shape.transform(0, 0, w, h); 
+    outline.transform(0, 0, w, h); 
 
     RPoint[] points = outline.getPoints();
 
