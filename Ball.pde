@@ -18,7 +18,7 @@ class Ball extends FCircle {
     this.setFriction(0);
     //this.addTorque(10);
     this.setDamping(0);
-    //this.setNoStroke();
+    this.setNoStroke();
     this.setNoFill();
     this.setAllowSleeping(false);
   }
@@ -55,7 +55,7 @@ class Ball extends FCircle {
         translate(r*cos(theta), r*sin(theta));
         rotate(theta+PI/2); 
         fill(0);
-        text(currentChar, 0, 0);
+        if(!finished) text(currentChar, 0, 0);
         popMatrix();
 
         arclength += w;

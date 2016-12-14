@@ -1,7 +1,7 @@
 // pins {mic, button1, button2, left, right}
 
-int[] pins1 = {1, 2, 3, 5, 6};
-int[] pins2 = {0, 8, 9, 10, 11};
+int[] pins1 = {0, 2, 3, 5, 6};
+int[] pins2 = {1, 8, 9, 10, 11};
 
 import cc.arduino.*;
 import processing.serial.*;
@@ -29,6 +29,11 @@ ArrayList<Ball> balls = new ArrayList<Ball>();
 Player p1, p2;
 PFont font;
 PImage bg;
+
+boolean finished = false;
+
+color normalColor = color(0, 120, 129);
+color chargingColor = color(0, 255, 0);
 
 void setup() {
   size(1280, 640);
@@ -59,8 +64,8 @@ void setup() {
   //renderObstacles();
 
   // player
-  p1 = new Player(pins1, -1);
-  p2 = new Player(pins2, 1);
+  p1 = new Player(pins1, -1, "Thomas");
+  p2 = new Player(pins2, 1, "John");
 
   // etc.
   font = createFont("Arial-Black-24.vlw", 24);
@@ -134,20 +139,32 @@ void controlBallCreationWithKey() {
     p1.portal = true;
     socket1.broadcast("start1");
     prePressed1 = 1;
+    p1.chargers[0].c = chargingColor;
+    p1.charging = true;
+    p1.charged++;
+    if (p1.charged > 6*50) p1.charged = 0;
   } else { 
     p1.portal = false;
     socket1.broadcast("stop1");    
     prePressed1 = 0;
+    p1.charged = 0;
+    p1.charging = false;
   }
 
   if (keyPressed && keyCode == RIGHT) {
     p2.portal = true;
     socket2.broadcast("start2");
     prePressed2 = 1;
+    p2.chargers[0].c = chargingColor;
+    p2.charging = true;
+    p2.charged++;
+    if (p2.charged > 6*50) p2.charged = 0;
   } else { 
     p2.portal = false;
     socket2.broadcast("stop2");
     prePressed2 = 0;
+    p2.charged = 0;
+    p2.charging = false;
   }
 }
 
@@ -155,7 +172,32 @@ int bId = 0;
 void websocketOnMessage(WebSocketConnection con, String msg) {
   Player p = (msg.substring(0, 3).equals("[a]")) ? p1 : p2;
 
-  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -500, 0), split(msg, ']')[1]));
+  println(msg);
+
+  msg = split(msg, ']')[1];
+
+  //for(int i = 0; i < msg.length(); i++) {
+  //  if(msg.substring(i, i+3).equals("개**")) {
+  //  } 
+  //}
+
+
+  int sob = msg.indexOf("개**");
+  if (sob != -1) {
+    msg = msg.substring(0, sob) + "개새끼" + msg.substring(sob+3, msg.length());
+  }
+
+  int fuck = msg.indexOf("f***");
+  if (fuck != -1) {
+    msg = msg.substring(0, fuck) + "fuck" + msg.substring(fuck+4, msg.length());
+  }
+
+  //if (msg.equals("개**")) {
+  //  msg = "개새끼";
+  //}
+  //else if (msg.equals("f***")) msg = "fuck";
+
+  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * 600, 0), msg));
   world.add((balls.get(balls.size() - 1)));
 }
 
@@ -168,9 +210,6 @@ void websocketOnClosed(WebSocketConnection con) {
 }
 
 void renderBorders() {
-
-  //world.add(new FSVGB("b1.svg", 0, 0, 500, 400));
-
   borders.add(new Border(72, 132, 201, 3, -45, true));
   borders.add(new Border(452, 63, 614, 3));
 
@@ -196,11 +235,11 @@ void renderBorders() {
   borders.add(new Border(width-687, height-120, 142, 3));
 
   borders.add(new Border(width-1180, height-108, 300, 3, 45, true));
-  
+
   for (int i = 0; i < borders.size(); i++) {
     world.add(borders.get(i));
   }
-  
+
   FCircle c1 = new FCircle(90);
   c1.setStatic(true);
   c1.setPosition(800, 110);
@@ -264,7 +303,7 @@ void contactEnded(FContact c) {
     if (cId > -100) {  // white obstacle
       if (occupied < 4) balls.get(bId).msgStorage.add(oWordsStorage[-cId]);
     } else { // black obstacle
-      if (occupied != 0) {
+      if (occupied > 1) {
         balls.get(bId).msgStorage.remove(balls.get(bId).msgStorage.size() - 1);
       } else {     
         balls.get(bId).disappeared = true;
@@ -276,17 +315,20 @@ void contactEnded(FContact c) {
   if ((cId == -1001) || (cId == -1002)) {  
     balls.get(bId).disappeared = true;
 
-    String loserWords = "";
-    for (int i = 0; i < balls.get(bId).msgStorage.size(); i++) {
-      loserWords += balls.get(bId).msgStorage.get(i);
-    }
+    String loserWords = sumString(balls.get(bId).msgStorage);
 
-    if (cId == -1001) {
+    if (cId == -1001 && !p1.lost) {
       p1.score--;
       p1.loserStorage.add(loserWords);
-    } else if (cId == -1002) {
+      p1.insult = loserWords;
+      p1.preFrameCount = frameCount;
+      println("p1 ", loserWords);
+    } else if (cId == -1002 && !p2.lost) {
       p2.score--;
-      p1.loserStorage.add(loserWords);
+      p2.loserStorage.add(loserWords);
+      p2.insult = loserWords;
+      p2.preFrameCount = frameCount;
+      println("p2 ", loserWords);
     }
 
     world.remove(balls.get(bId));
@@ -297,11 +339,12 @@ String sumString(ArrayList<String> arrListString) {
   String sum = "";
 
   for (int i = 0; i < arrListString.size(); i++) {
-    sum += arrListString.get(i);
+    sum += arrListString.get(i) + " ";
   }
 
   return sum;
 }
+
 
 void mouseClicked() {
   println(mouseX, mouseY);

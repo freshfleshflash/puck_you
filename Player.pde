@@ -12,12 +12,13 @@ class Player {
   int pin_right;
 
   int player;
+  String name;
   float x;
   float xGap = 400;
   float y = height/2;
   int level;
   int preLevel = 0;
-  float ballSlot = -300;
+  float ballSlot = -288;
   int prePressed = 0;
 
   boolean portal = false;
@@ -29,7 +30,16 @@ class Player {
   int score = 0;
   ArrayList<String> loserStorage = new ArrayList<String>();
 
-  Player(int[] pins, int player) {
+  boolean lost = false;
+  String insult = "";
+
+  int charged = 0;
+  boolean charging = false;
+
+  Charger[] chargers = new Charger[6];
+
+
+  Player(int[] pins, int player, String name) {
     this.pin_mic = pins[0];
     this.pin_b1 = pins[1];
     this.pin_b2 = pins[2];
@@ -37,6 +47,7 @@ class Player {
     this.pin_right = pins[4];
 
     this.player = player;
+    this.name = name;
     this.x = width/2 + xGap * player;
     this.ballSlot = height/2 - ballSlot * player;
 
@@ -44,13 +55,33 @@ class Player {
     world.add(left);
     right = new RightRacket(pin_right, player, -1, x, y);
     world.add(right);
+
+    for (int i = 0; i < chargers.length; i++) {
+      chargers[i] = new Charger(width/2+612*player - player * i * 19, ballSlot);
+    }
   }
 
   void method() {
     this.controlWithVoice();
-    this.drawPortal();
+    //this.drawPortal();
     this.detectWin();
-    if (player == 1) this.generateTestingBall();
+    this.displayLoserStorage();
+    this.generateTestingBall();
+    this.insulted();
+
+    for (int i = 0; i < chargers.length; i++) {
+      this.chargers[i].display();
+
+      if (charging) {
+        if (charged >= (i) * 50) {
+          chargers[i].c = chargingColor;
+        } else {
+          chargers[i].c = normalColor;
+        }
+      } else {
+        chargers[i].c = normalColor;
+      }
+    }
   }
 
   int levelId = 0;
@@ -60,8 +91,9 @@ class Player {
   int defaultLevel;
   boolean defaultSet = false;
 
-  void controlWithVoice() {
+  int preFrameCount = frameCount;
 
+  void controlWithVoice() {
     level = arduino.analogRead(pin_mic);
 
     levels[levelId++] = level;
@@ -78,14 +110,16 @@ class Player {
 
     realLevel = constrain(-realLevel + defaultLevel, 0, 180);
 
-    left.rotate_(realLevel); // 0이 들어간다 
-    right.rotate_(realLevel);
+    if (arduino.digitalRead(pin_b2) == 1) {
+      left.rotate_(realLevel); // 0이 들어간다 
+      right.rotate_(realLevel);
+    }
   }
 
   void drawPortal() {
     if (portal) {
       fill(0);
-      ellipse(x, ballSlot, 50, 50);
+      ellipse(width/2+568*player, ballSlot, 50, 50);
     }
   }
 
@@ -95,14 +129,54 @@ class Player {
       //String[] msg = {"시발"};
 
       //wordsStorage.add(msg);
-      balls.add(new Ball(bId++, width/2, height/2, new PVector(player * random(300, 500), random(300, 500)), "슈발"));
+      balls.add(new Ball(bId++, width/2+568*player, ballSlot, new PVector(player * random(100, 300), 0), "슈발"));
+      println(bId);
       world.add((balls.get(balls.size() - 1)));
     }
   }
 
+  float angle;
   void detectWin() {
-    if (this.score <= -5) {
-      text(sumString(loserStorage), x, y);
+    if (this.score <= -2) {
+      pushMatrix();
+      translate(width/2, height/2);
+      rotate(radians(angle));
+      angle++;
+      fill(255, 0, 0);
+      textSize(40);
+      textAlign(CENTER, CENTER);
+      text(this.name + " is " + sumString(loserStorage), 0, 0);
+      p1.lost = true;
+      p2.lost = true;
+      finished = true;
+      world.clear();
+      popMatrix();
+    }
+  }
+
+  void displayLoserStorage() {
+    textSize(30);
+    pushMatrix();
+    translate(width/2 + player * 400, y);
+    rotate(radians(-90) * player);
+    //text(sumString(loserStorage).substring(0, 15), 0, 0);
+    popMatrix();
+  }
+
+  void insulted() {
+
+    if (!lost) {
+      if (frameCount > preFrameCount + 90) {
+        insult = "";
+      }
+
+      textSize(30);
+      pushMatrix();
+      translate(width/2 + player * 400, y);
+      rotate(radians(-90) * player);
+      fill(255);
+      text(insult, 0, 0);
+      popMatrix();
     }
   }
 }
