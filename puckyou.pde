@@ -1,6 +1,6 @@
 // pins {mic, button1, button2, left, right}
 
-int[] pins1 = {5, 2, 3, 4, 5};
+int[] pins1 = {1, 2, 3, 5, 6};
 int[] pins2 = {0, 8, 9, 10, 11};
 
 import cc.arduino.*;
@@ -9,11 +9,6 @@ import muthesius.net.*;
 import org.webbitserver.*;
 import fisica.*;
 import geomerative.*;
-import processing.video.*;
-import jp.nyatla.nyar4psg.*;
-
-Capture cam;
-MultiMarker nya;
 
 Arduino arduino;
 
@@ -24,40 +19,22 @@ int prePressed2 = 0;
 
 FWorld world;
 
+ArrayList<Border> scoreBorders = new ArrayList<Border>();
 ArrayList<Border> borders = new ArrayList<Border>();
-ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
+ArrayList<WhiteObstacle> whiteObstacles = new ArrayList<WhiteObstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
 String[] oWordsStorage = {"", "정말로", "이런", "아오"}; 
 ArrayList<Ball> balls = new ArrayList<Ball>();
 
 Player p1, p2;
 PFont font;
-
 PImage bg;
-
-Physical ppp;
-
-//ArrayList<Physical> ppp = new ArrayList<Physical>();
-
 
 void setup() {
   size(1280, 640);
   smooth();
 
-  frameRate(60);
-
   bg = loadImage("totalbg.jpg");
-
-  cam=new Capture(this, width, height);
-  nya=new MultiMarker(this, width, height, "camera_para.dat", NyAR4PsgConfig.CONFIG_PSG);
-  nya.addARMarker("patt.hiro", 80);//id=0
-  cam.start();
-
-
-
-
-
-
 
   // arduino
   setArduino();
@@ -78,11 +55,8 @@ void setup() {
   world.setEdgesRestitution(1);
 
   renderBorders();
+  renderScorescoreBorders();
   //renderObstacles();
-  
-  ppp = new Physical();
-  world.add(ppp);
-
 
   // player
   p1 = new Player(pins1, -1);
@@ -93,29 +67,8 @@ void setup() {
   textFont(font);
 }
 
-
-
-
-
-int c=0;
-
-void draw() {
-
-
-  c++;
-  if (cam.available() !=true) {
-    return;
-  }
-  cam.read();
-  nya.detect(cam);
-
+void draw() { 
   image(bg, 0, 0);
-
-
-
-
-
-
 
   p1.method();
   p2.method();
@@ -124,38 +77,26 @@ void draw() {
   world.step();
 
   manageBalls();
-  //controlBallCreation();
+  controlBallCreation();
   controlBallCreationWithKey();
-
-  //drawCenterLine();
-  //convertBooleanToInt();
-
-
-
-
-
-  fill(255);
-  rect(nya.getMarkerVertex2D(0)[0].x, nya.getMarkerVertex2D(0)[0].y, 100, 100);
-  
-  
-  ppp.setPosition(nya.getMarkerVertex2D(0)[0].x, nya.getMarkerVertex2D(0)[0].y);
-  
 }
+
+int hmm = 0;
 
 void setArduino() {
   println(Arduino.list());
   arduino = new Arduino(this, Arduino.list()[2], 57600);
 
-  for (int i = 0; i < 3; i++) {
-    arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
-    arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
-  }
-
-  arduino.pinMode(0, Arduino.INPUT);
+  //  for (int i = 0; i < 3; i++) {
+  //    arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
+  //    arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
+  //  }
 
   for (int i = 3; i < 5; i++) {
     arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
+    println(pins1[i]);
     arduino.pinMode(pins2[i], Arduino.SERVO); // player 2
+    println(pins2[i]);
   }
 }
 
@@ -227,31 +168,74 @@ void websocketOnClosed(WebSocketConnection con) {
 }
 
 void renderBorders() {
-  float borderW = 600;
-  float borderH = 20; 
 
-  borders.add(new Border(0, height/2, borderH, borderW, -1001));
-  borders.add(new Border(width, height/2, borderH, borderW, -1002));
+  //world.add(new FSVGB("b1.svg", 0, 0, 500, 400));
 
+  borders.add(new Border(72, 132, 201, 3, -45, true));
+  borders.add(new Border(452, 63, 614, 3));
+
+  borders.add(new Border(258, 128, 144, 13));
+  borders.add(new Border(159, 156, 85, 13, -45, true));
+
+  borders.add(new Border(1023, 128, 144, 13));
+  borders.add(new Border(1122, 156, 85, 13, 45, true));
+
+  borders.add(new Border(687, 120, 142, 3));
+
+  borders.add(new Border(1180, 108, 300, 3, 45, true));
+
+  borders.add(new Border(width-72, height-132, 201, 3, -45, true));
+  borders.add(new Border(width-452, height-63, 614, 3));
+
+  borders.add(new Border(width-258, height-125, 144, 13));
+  borders.add(new Border(width-159, height-152, 85, 13, -45, true));
+
+  borders.add(new Border(width-1023, height-125, 144, 13));
+  borders.add(new Border(width-1122, height-152, 85, 13, 45, true));
+
+  borders.add(new Border(width-687, height-120, 142, 3));
+
+  borders.add(new Border(width-1180, height-108, 300, 3, 45, true));
+  
   for (int i = 0; i < borders.size(); i++) {
     world.add(borders.get(i));
   }
+  
+  FCircle c1 = new FCircle(90);
+  c1.setStatic(true);
+  c1.setPosition(800, 110);
+  c1.setNoFill();
+  c1.setNoStroke();
+  world.add(c1);
 
+  FCircle c2 = new FCircle(90);
+  c2.setStatic(true);
+  c2.setPosition(width-800, height-110);
+  c2.setNoFill();
+  c2.setNoStroke();
+  world.add(c2);
+}
 
+void renderScorescoreBorders() {
+  float borderW = 260;
+  float borderH = 20; 
 
+  scoreBorders.add(new Border(0, height/2, borderH, borderW, -1001));
+  scoreBorders.add(new Border(width, height/2, borderH, borderW, -1002));
 
-
-  //world.add(new FLine(0, 0, width, height));
+  for (int i = 0; i < scoreBorders.size(); i++) {
+    world.add(scoreBorders.get(i));
+  }
 }
 
 void renderObstacles() {
-  obstacles.add(new Obstacle());
+  whiteObstacles.add(new WhiteObstacle());
   blackObstacles.add(new BlackObstacle());
 
   float borderW = 600;
   for (int i = 1; i <= 1; i++) {
-    obstacles.add(new Obstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
-    world.add(obstacles.get(i));
+    whiteObstacles.add(new WhiteObstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+    world.add(whiteObstacles.get(i));
   }
 
   for (int i = 1; i <= 3; i++) {
@@ -269,16 +253,15 @@ void manageBalls() {
 }
 
 // 가서 부딪치는 애(공)가 getBody2() 임 
-
 void contactEnded(FContact c) {
   int cId = c.getBody1().getGroupIndex();
   int bId = c.getBody2().getGroupIndex();
 
   if ((cId < 0) && cId > -1000) {
     int occupied = balls.get(bId).msgStorage.size();
-    println(occupied);
+    //println(occupied);
 
-    if (cId > -100) {
+    if (cId > -100) {  // white obstacle
       if (occupied < 4) balls.get(bId).msgStorage.add(oWordsStorage[-cId]);
     } else { // black obstacle
       if (occupied != 0) {
@@ -310,18 +293,6 @@ void contactEnded(FContact c) {
   }
 }
 
-void drawCenterLine() {
-  stroke(100);
-  line(0, height/2, 1280, height/2);
-  line(width/2, 0, width/2, 800);
-}
-
-int pressed = 0;
-void convertBooleanToInt() {
-  if (keyPressed) pressed = 1;
-  else pressed = 0;
-}
-
 String sumString(ArrayList<String> arrListString) {
   String sum = "";
 
@@ -330,4 +301,8 @@ String sumString(ArrayList<String> arrListString) {
   }
 
   return sum;
+}
+
+void mouseClicked() {
+  println(mouseX, mouseY);
 }

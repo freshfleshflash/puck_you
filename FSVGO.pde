@@ -1,13 +1,14 @@
-class FSVGBorder extends FPoly {
+class FSVGO extends FPoly {
   RShape m_shape;
 
-  float w = 1280;
-  float h = 640;  
+  float w = 107;
+  float h = 74;  
 
-  FSVGBorder() {
+  FSVGO() {
     super();
+    this.setStatic(true);
 
-    RShape fullSvg = RG.loadShape("border.svg");
+    RShape fullSvg = RG.loadShape("fff.svg");
     m_shape = fullSvg.getChild("object");
     RShape outline = fullSvg.getChild("outline");
 

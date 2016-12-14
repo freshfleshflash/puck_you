@@ -1,13 +1,13 @@
-class BlackObstacle extends FCircle {
+class BlackObstacle extends FSVGO {
 
   float x, y;
 
   BlackObstacle() {
-    super(0);
+    super();
   }
 
   BlackObstacle(int id, float x, float y) {
-    super(100);
+    super();
 
     this.x = x;
     this.y = y;
@@ -18,5 +18,7 @@ class BlackObstacle extends FCircle {
     this.setFill(0);
     this.setFriction(0);
     this.setRestitution(1);
+    /////
+    this.setRotation(random(0, 360));
   }
 }

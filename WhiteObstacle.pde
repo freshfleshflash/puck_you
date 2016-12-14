@@ -1,12 +1,12 @@
-class Obstacle extends FCircle {
+class WhiteObstacle extends FSVGO {
   float x, y;
 
-  Obstacle() {
-    super(0);
+  WhiteObstacle() {
+    super();
   }
 
-  Obstacle(int id, float x, float y) {
-    super(100);
+  WhiteObstacle(int id, float x, float y) {
+    super();
 
     this.x = x;
     this.y = y;

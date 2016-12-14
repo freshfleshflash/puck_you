@@ -6,7 +6,7 @@ class Ball extends FCircle {
   boolean disappeared = false;
 
   Ball(int id, float x, float y, PVector velocity, String msg) {
-    super(40);
+    super(50);
 
     this.id = id;
     this.msgStorage.add(msg);
@@ -28,11 +28,6 @@ class Ball extends FCircle {
       textAlign(CENTER, TOP);
 
       String msgSum = sumString(msgStorage);
-
-      //for (int i = 0; i < msgStorage.size(); i++) {
-      //  msgSum += msgStorage.get(i);
-      //}
-
       while (msgSum.length() < 7) {
         msgSum += 'ㅗ';
       }
@@ -60,7 +55,7 @@ class Ball extends FCircle {
         translate(r*cos(theta), r*sin(theta));
         rotate(theta+PI/2); 
         fill(0);
-        //text(currentChar, 0, 0);
+        text(currentChar, 0, 0);
         popMatrix();
 
         arclength += w;

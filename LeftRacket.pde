@@ -4,8 +4,6 @@ class LeftRacket extends FSVG {
 
   LeftRacket(int pin, int player, int dir, float px, float py) {
     super(player, dir);
-    
-    //super(50, 100);
 
     this.pin = pin;
     this.player = player;
@@ -13,21 +11,28 @@ class LeftRacket extends FSVG {
 
     this.setStatic(true);
     this.setPosition(px, py);
-    this.adjustPosition(100 * player, 135 * dir);
+    this.adjustPosition(100 * player, 135 * dir * player);
     this.setStroke(0, 0, 0);
     this.setFriction(0);    
-    
-    //this.setFill(229, 71, 70);
-
     this.setRestitution(1);
+    
+    this.setNoFill();
   }
 
-  
-  int testLevel = 0;
-  void rotate_(int level) {        
-    //println("left ", level);   
-    //level = 180;
-    this.setRotation(radians(-testLevel++));  
+  void rotate_(int level) {
+    this.setRotation(radians(-level));  
     arduino.servoWrite(pin, level);
+
+    //testRotate();
+  }
+
+  void testRotate() {
+    testLevel += test;
+
+    if (testLevel > 180) test = -1;
+    if (testLevel < 0) test = 1;
+    
+    this.setRotation(radians(-testLevel));  
+    arduino.servoWrite(pin, testLevel);
   }
 }

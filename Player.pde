@@ -1,7 +1,10 @@
 // pins {mic, button1, button2, left, right}
 
+int testLevel = 90;
+int test = 1;
+
 class Player {
-  
+
   int pin_mic;
   int pin_b1;
   int pin_b2;
@@ -18,15 +21,14 @@ class Player {
   int prePressed = 0;
 
   boolean portal = false;
-
   int[] levels = new int[30];
 
   LeftRacket left;
   RightRacket right;
-  
+
   int score = 0;
   ArrayList<String> loserStorage = new ArrayList<String>();
-  
+
   Player(int[] pins, int player) {
     this.pin_mic = pins[0];
     this.pin_b1 = pins[1];
@@ -47,9 +49,8 @@ class Player {
   void method() {
     this.controlWithVoice();
     this.drawPortal();
-    this.objectSomething();
-    if(player == 1) this.generateTestingBall();
-    detectWin();
+    this.detectWin();
+    if (player == 1) this.generateTestingBall();
   }
 
   int levelId = 0;
@@ -77,15 +78,8 @@ class Player {
 
     realLevel = constrain(-realLevel + defaultLevel, 0, 180);
 
-    //println(realLevel);
-
     left.rotate_(realLevel); // 0이 들어간다 
     right.rotate_(realLevel);
-  }
-
-  int hmm = 0;
-
-  void objectSomething() {
   }
 
   void drawPortal() {
@@ -101,15 +95,14 @@ class Player {
       //String[] msg = {"시발"};
 
       //wordsStorage.add(msg);
-      balls.add(new Ball(bId++, width/2,height/2, new PVector(player * random(300, 500), random(300, 500)), "슈발"));
+      balls.add(new Ball(bId++, width/2, height/2, new PVector(player * random(300, 500), random(300, 500)), "슈발"));
       world.add((balls.get(balls.size() - 1)));
     }
   }
-  
-  
+
   void detectWin() {
-    if(this.score <= -5) {
-      text(sumString(loserStorage), x, y);  
+    if (this.score <= -5) {
+      text(sumString(loserStorage), x, y);
     }
   }
 }
