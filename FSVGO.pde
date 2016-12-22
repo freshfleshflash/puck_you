@@ -2,7 +2,7 @@ class FSVGO extends FPoly {
   RShape m_shape;
 
   float w = 107;
-  float h = 74;  
+  float h = 72;  
 
   FSVGO() {
     super();

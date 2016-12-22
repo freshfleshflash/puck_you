@@ -17,5 +17,10 @@ class WhiteObstacle extends FSVGO {
     this.setFill(255);
     this.setFriction(0);
     this.setRestitution(1);
+
+    this.setNoFill();
+
+
+    this.setNoStroke();
   }
 }

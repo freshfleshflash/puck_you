@@ -1,7 +1,11 @@
 // pins {mic, button1, button2, left, right}
 
-int[] pins1 = {0, 2, 3, 5, 6};
-int[] pins2 = {1, 8, 9, 10, 11};
+int[] pins2 = {1, 2, 3, 5, 6};
+int[] pins1 = {0, 9, 8, 11, 10};
+
+import guru.ttslib.*;
+
+TTS tts;
 
 import cc.arduino.*;
 import processing.serial.*;
@@ -9,6 +13,15 @@ import muthesius.net.*;
 import org.webbitserver.*;
 import fisica.*;
 import geomerative.*;
+
+
+int llll;
+
+
+import processing.sound.*;
+Amplitude amp;
+AudioIn in;
+
 
 Arduino arduino;
 
@@ -23,7 +36,7 @@ ArrayList<Border> scoreBorders = new ArrayList<Border>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<WhiteObstacle> whiteObstacles = new ArrayList<WhiteObstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
-String[] oWordsStorage = {"", "정말로", "이런", "아오"}; 
+String[] oWordsStorage = {"", "Crap", "Shit"}; 
 ArrayList<Ball> balls = new ArrayList<Ball>();
 
 Player p1, p2;
@@ -33,11 +46,21 @@ PImage bg;
 boolean finished = false;
 
 color normalColor = color(0, 120, 129);
-color chargingColor = color(0, 255, 0);
+color chargingColor = color(129, 0, 120);
+
+int wNum = 1;
+int bNum = 1;
 
 void setup() {
   size(1280, 640);
   smooth();
+
+
+
+  amp = new Amplitude(this);
+  in = new AudioIn(this, 0);
+  in.start();
+  amp.input(in);
 
   bg = loadImage("totalbg.jpg");
 
@@ -61,18 +84,25 @@ void setup() {
 
   renderBorders();
   renderScorescoreBorders();
-  //renderObstacles();
+  renderObstacles();
 
   // player
   p1 = new Player(pins1, -1, "Thomas");
   p2 = new Player(pins2, 1, "John");
 
   // etc.
-  font = createFont("Arial-Black-24.vlw", 24);
+  font = createFont("ArialRoundedMTBold-48.vlw", 24);
   textFont(font);
+
+  tts = new TTS();
 }
 
+int tttt = 0;
+
 void draw() { 
+  //println(arduino.digitalRead(2), arduino.digitalRead(3), arduino.digitalRead(5), arduino.digitalRead(6));
+  llll = (int)amp.analyze()*10000;
+
   image(bg, 0, 0);
 
   p1.method();
@@ -83,26 +113,33 @@ void draw() {
 
   manageBalls();
   controlBallCreation();
-  controlBallCreationWithKey();
-}
+  //controlBallCreationWithKey();
 
-int hmm = 0;
+  println(arduino.digitalRead(2), arduino.digitalRead(3), arduino.digitalRead(8), arduino.digitalRead(9));
+}
 
 void setArduino() {
   println(Arduino.list());
-  arduino = new Arduino(this, Arduino.list()[2], 57600);
+  arduino = new Arduino(this, Arduino.list()[3], 57600);
 
-  //  for (int i = 0; i < 3; i++) {
-  //    arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
-  //    arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
-  //  }
-
-  for (int i = 3; i < 5; i++) {
-    arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
+  for (int i = 1; i < 3; i++) {
+    arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
     println(pins1[i]);
-    arduino.pinMode(pins2[i], Arduino.SERVO); // player 2
+    arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
     println(pins2[i]);
   }
+
+  for (int i = 3; i < 5; i++) {
+    //arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
+    //println(pins1[i]);
+    //arduino.pinMode(pins2[i], Arduino.SERVO); // player 2
+    //println(pins2[i]);
+  }
+
+  arduino.pinMode(5, Arduino.SERVO); // player 2
+  arduino.pinMode(6, Arduino.SERVO); // player 2
+  arduino.pinMode(10, Arduino.SERVO); // player 2
+  arduino.pinMode(11, Arduino.SERVO); // player 2
 }
 
 void stop() {
@@ -116,20 +153,28 @@ void controlBallCreation() {
     p1.portal = true;
     socket1.broadcast("start1");
     prePressed1 = 1;
+    p1.chargers[0].c = chargingColor;
+    p1.charging = true;
   } else if ((arduino.digitalRead(p1.pin_b1) - prePressed1 == -1)) { 
     p1.portal = false;
     socket1.broadcast("stop1");    
     prePressed1 = 0;
+    p1.charged = 0;
+    p1.charging = false;
   }
 
   if (((arduino.digitalRead(p2.pin_b1) - prePressed2) == 1)) {
     p2.portal = true;
     socket2.broadcast("start2");
     prePressed2 = 1;
+    p2.chargers[0].c = chargingColor;
+    p2.charging = true;
   } else if ((arduino.digitalRead(p2.pin_b1) - prePressed2 == -1)) { 
     p2.portal = false;
     socket2.broadcast("stop2");
     prePressed2 = 0;
+    p2.charged = 0;
+    p2.charging = false;
   }
 }
 
@@ -197,7 +242,10 @@ void websocketOnMessage(WebSocketConnection con, String msg) {
   //}
   //else if (msg.equals("f***")) msg = "fuck";
 
-  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * 600, 0), msg));
+  balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -400, 0), msg));
+
+  tts.speak(msg);
+
   world.add((balls.get(balls.size() - 1)));
 }
 
@@ -210,6 +258,12 @@ void websocketOnClosed(WebSocketConnection con) {
 }
 
 void renderBorders() {
+  //borders.add(new Border(0, 0, width, 5));
+  //borders.add(new Border(0, height-1, width, 5));
+  //borders.add(new Border(0, 0, 1, height));
+  //borders.add(new Border(width, 0, 1, height));
+
+
   borders.add(new Border(72, 132, 201, 3, -45, true));
   borders.add(new Border(452, 63, 614, 3));
 
@@ -272,13 +326,20 @@ void renderObstacles() {
   blackObstacles.add(new BlackObstacle());
 
   float borderW = 600;
-  for (int i = 1; i <= 1; i++) {
-    whiteObstacles.add(new WhiteObstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+
+  whiteObstacles.add(new WhiteObstacle(1, 480, 168));
+  //whiteObstacles.add(new WhiteObstacle(2, 986, 359));
+
+  for (int i = 1; i <= wNum; i++) {
+    //  whiteObstacles.add(new WhiteObstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(whiteObstacles.get(i));
   }
 
-  for (int i = 1; i <= 3; i++) {
-    blackObstacles.add(new BlackObstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
+  blackObstacles.add(new BlackObstacle(1, 722, 341));
+  //blackObstacles.add(new BlackObstacle(2, 641, 375));
+
+  for (int i = 1; i <= bNum; i++) {
+    //  blackObstacles.add(new BlackObstacle(i, random((width-borderW)/4, width - (width-borderW)/3), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(blackObstacles.get(i));
   }
 }
@@ -344,7 +405,6 @@ String sumString(ArrayList<String> arrListString) {
 
   return sum;
 }
-
 
 void mouseClicked() {
   println(mouseX, mouseY);

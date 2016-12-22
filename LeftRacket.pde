@@ -11,12 +11,14 @@ class LeftRacket extends FSVG {
 
     this.setStatic(true);
     this.setPosition(px, py);
+    //this.adjustRotation(30);
     this.adjustPosition(100 * player, 135 * dir * player);
-    this.setStroke(0, 0, 0);
+    //this.setStroke(0, 0, 0);
     this.setFriction(0);    
     this.setRestitution(1);
     
     this.setNoFill();
+    this.setNoStroke();
   }
 
   void rotate_(int level) {
@@ -26,13 +28,14 @@ class LeftRacket extends FSVG {
     //testRotate();
   }
 
+  int testLevel = 0;
   void testRotate() {
-    testLevel += test;
+    testLevel++;
 
-    if (testLevel > 180) test = -1;
-    if (testLevel < 0) test = 1;
+    //if (testLevel > 180) test = -1;
+    //if (testLevel < 0) test = 1;
     
-    this.setRotation(radians(-testLevel));  
+    this.setRotation(-radians(testLevel));  
     arduino.servoWrite(pin, testLevel);
   }
 }

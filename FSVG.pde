@@ -4,13 +4,13 @@ class FSVG extends FPoly {
   float w = 144.28*1;
   float h = 46.28*1;  
   float axisTranslation = 24;
-  float defaultAng = 0;
+  float defaultAng = -10;
 
   FSVG(int player, int dir) {
     super();
-    
+
     this.setFill(229, 71, 70);
-       
+
     RShape fullSvg = RG.loadShape("racket.svg");
     m_shape = fullSvg.getChild("object");
     RShape outline = fullSvg.getChild("outline");
@@ -23,8 +23,8 @@ class FSVG extends FPoly {
     m_shape.transform(-axisTranslation, -h/2, w, h); 
     outline.transform(-axisTranslation, -h/2, w, h); 
 
-//    m_shape.rotate(radians(defaultAng * dir)); 
-//    outline.rotate(radians(defaultAng * dir)); 
+    m_shape.rotate(radians(defaultAng * dir*player)); 
+    outline.rotate(radians(defaultAng * dir*player)); 
 
     m_shape.scale(player, 1);
     outline.scale(player, 1);

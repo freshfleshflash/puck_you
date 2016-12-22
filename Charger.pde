@@ -2,7 +2,7 @@ class Charger {
 
   color c = normalColor;
   float x, y;
-  float size = 25;
+  float size = 27;
 
   Charger(float x, float y) {
     this.x = x;

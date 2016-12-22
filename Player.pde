@@ -1,7 +1,7 @@
 // pins {mic, button1, button2, left, right}
 
-int testLevel = 90;
-int test = 1;
+//int testLevel = 0;
+//int test = 1;
 
 class Player {
 
@@ -18,7 +18,7 @@ class Player {
   float y = height/2;
   int level;
   int preLevel = 0;
-  float ballSlot = -288;
+  float ballSlot = -287;
   int prePressed = 0;
 
   boolean portal = false;
@@ -68,7 +68,25 @@ class Player {
     this.displayLoserStorage();
     this.generateTestingBall();
     this.insulted();
+    this.charging();
 
+    //for (int i = 0; i < chargers.length; i++) {
+    //  this.chargers[i].display();
+
+    //  if (charging) {
+    //    if (charged >= (i) * 50) {
+    //      chargers[i].c = chargingColor;
+    //    } else {
+    //      chargers[i].c = normalColor;
+    //    }
+    //  } else {
+    //    chargers[i].c = normalColor;
+    //  }
+    //}
+  }
+
+  void charging() {
+    charged++;
     for (int i = 0; i < chargers.length; i++) {
       this.chargers[i].display();
 
@@ -82,7 +100,9 @@ class Player {
         chargers[i].c = normalColor;
       }
     }
+    if (charged > 6*350) charged = 0;
   }
+
 
   int levelId = 0;
   int realLevel;
@@ -108,13 +128,27 @@ class Player {
       if (defaultCount > 100) defaultSet = true;
     }
 
-    realLevel = constrain(-realLevel + defaultLevel, 0, 180);
+    //realLevel = constrain(-realLevel + defaultLevel, 0, 180);  /////////////////
+    realLevel = constrain(-realLevel + defaultLevel, 60, 120);  
+
+
+    //realLevel = map(llll, 
 
     if (arduino.digitalRead(pin_b2) == 1) {
-      left.rotate_(realLevel); // 0이 들어간다 
-      right.rotate_(realLevel);
-    }
+      
+      hi+=10;
+      
+      //left.rotate_(realLevel++); // 0이 들어간다 
+      //right.rotate_(realLevel++);
+    } else hi = 0;
+
+    left.rotate_(constrain(hi, 30, 120)); // 0이 들어간다 
+    right.rotate_(constrain(hi, 30, 120));
+
+
   }
+  
+  int hi;
 
   void drawPortal() {
     if (portal) {
@@ -129,7 +163,7 @@ class Player {
       //String[] msg = {"시발"};
 
       //wordsStorage.add(msg);
-      balls.add(new Ball(bId++, width/2+568*player, ballSlot, new PVector(player * random(100, 300), 0), "슈발"));
+      balls.add(new Ball(bId++, width/2+568*player, ballSlot, new PVector(player * random(100, 300), 0), "Stupid"));
       println(bId);
       world.add((balls.get(balls.size() - 1)));
     }
@@ -137,15 +171,16 @@ class Player {
 
   float angle;
   void detectWin() {
-    if (this.score <= -2) {
+    if (this.score <= -5) {
       pushMatrix();
       translate(width/2, height/2);
       rotate(radians(angle));
       angle++;
       fill(255, 0, 0);
-      textSize(40);
+      textSize(25);
       textAlign(CENTER, CENTER);
       text(this.name + " is " + sumString(loserStorage), 0, 0);
+      //tts.speak(this.name + " is " + sumString(loserStorage));
       p1.lost = true;
       p2.lost = true;
       finished = true;
@@ -164,7 +199,6 @@ class Player {
   }
 
   void insulted() {
-
     if (!lost) {
       if (frameCount > preFrameCount + 90) {
         insult = "";
