@@ -24,18 +24,12 @@ class RightRacket extends FSVG {
 
   void rotate_(int level) {
     this.setRotation(radians(level));  
-    //arduino.servoWrite(pin, (int)map(level, 0, 180, 180, 0));  ////////////
     arduino.servoWrite(pin, (int)map(level, 30, 120, 120, 30));
-
-    //testRotate();
   }
 
   int testLevel = 0;
   void testRotate() {
     testLevel ++;
-
-    //if (testLevel > 180) test = -1;
-    //if (testLevel < 0) test = 1;
 
     this.setRotation(radians(testLevel));  
     arduino.servoWrite(pin, (int)map(testLevel, 0, 180, 180, 0));

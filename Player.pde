@@ -1,11 +1,8 @@
 // pins {mic, button1, button2, left, right}
 
-//int testLevel = 0;
-//int test = 1;
-
 class Player {
 
-  int pin_mic;
+  //int pin_mic;
   int pin_b1;
   int pin_b2;
   int pin_left;
@@ -16,13 +13,13 @@ class Player {
   float x;
   float xGap = 400;
   float y = height/2;
-  int level;
-  int preLevel = 0;
+  //int level;
+  //int preLevel = 0;
   float ballSlot = -287;
   int prePressed = 0;
 
   boolean portal = false;
-  int[] levels = new int[30];
+  //int[] levels = new int[30];
 
   LeftRacket left;
   RightRacket right;
@@ -38,9 +35,8 @@ class Player {
 
   Charger[] chargers = new Charger[6];
 
-
   Player(int[] pins, int player, String name) {
-    this.pin_mic = pins[0];
+    //this.pin_mic = pins[0];
     this.pin_b1 = pins[1];
     this.pin_b2 = pins[2];
     this.pin_left = pins[3];
@@ -62,27 +58,12 @@ class Player {
   }
 
   void method() {
-    this.controlWithVoice();
-    //this.drawPortal();
+    this.controlWithButton();
     this.detectWin();
     this.displayLoserStorage();
     this.generateTestingBall();
     this.insulted();
     this.charging();
-
-    //for (int i = 0; i < chargers.length; i++) {
-    //  this.chargers[i].display();
-
-    //  if (charging) {
-    //    if (charged >= (i) * 50) {
-    //      chargers[i].c = chargingColor;
-    //    } else {
-    //      chargers[i].c = normalColor;
-    //    }
-    //  } else {
-    //    chargers[i].c = normalColor;
-    //  }
-    //}
   }
 
   void charging() {
@@ -103,7 +84,6 @@ class Player {
     if (charged > 6*350) charged = 0;
   }
 
-
   int levelId = 0;
   int realLevel;
   int defaultCount = 0;
@@ -113,56 +93,36 @@ class Player {
 
   int preFrameCount = frameCount;
 
-  void controlWithVoice() {
-    level = arduino.analogRead(pin_mic);
+  void controlWithButton() {
+    //level = arduino.analogRead(pin_mic);
 
-    levels[levelId++] = level;
-    if (levelId == levels.length) levelId = 0;
-    int sum = 0;
-    for (int i = 0; i < levels.length; i++) sum += levels[i];
-    realLevel = (int)sum / levels.length;
+    //levels[levelId++] = level;
+    //if (levelId == levels.length) levelId = 0;
+    //int sum = 0;
+    //for (int i = 0; i < levels.length; i++) sum += levels[i];
+    //realLevel = (int)sum / levels.length;
 
-    if (!defaultSet) {
-      defaultLevel = realLevel;     
-      defaultCount++;
-      if (defaultCount > 100) defaultSet = true;
-    }
+    //if (!defaultSet) {
+    //  defaultLevel = realLevel;     
+    //  defaultCount++;
+    //  if (defaultCount > 100) defaultSet = true;
+    //}
 
-    //realLevel = constrain(-realLevel + defaultLevel, 0, 180);  /////////////////
-    realLevel = constrain(-realLevel + defaultLevel, 60, 120);  
+    //realLevel = constrain(-realLevel + defaultLevel, 60, 120);  
 
-
-    //realLevel = map(llll, 
-
-    if (arduino.digitalRead(pin_b2) == 1) {
-      
-      hi+=10;
-      
-      //left.rotate_(realLevel++); // 0이 들어간다 
-      //right.rotate_(realLevel++);
+    if (arduino.digitalRead(pin_b2) == 1) {      
+      hi += 10;
     } else hi = 0;
 
     left.rotate_(constrain(hi, 30, 120)); // 0이 들어간다 
     right.rotate_(constrain(hi, 30, 120));
-
-
   }
-  
+
   int hi;
-
-  void drawPortal() {
-    if (portal) {
-      fill(0);
-      ellipse(width/2+568*player, ballSlot, 50, 50);
-    }
-  }
 
   int bId = 0;
   void generateTestingBall() {
     if (keyPressed && key == ENTER) {
-      //String[] msg = {"시발"};
-
-      //wordsStorage.add(msg);
       balls.add(new Ball(bId++, width/2+568*player, ballSlot, new PVector(player * random(100, 300), 0), "Stupid"));
       println(bId);
       world.add((balls.get(balls.size() - 1)));
@@ -180,7 +140,6 @@ class Player {
       textSize(25);
       textAlign(CENTER, CENTER);
       text(this.name + " is " + sumString(loserStorage), 0, 0);
-      //tts.speak(this.name + " is " + sumString(loserStorage));
       p1.lost = true;
       p2.lost = true;
       finished = true;
@@ -194,7 +153,6 @@ class Player {
     pushMatrix();
     translate(width/2 + player * 400, y);
     rotate(radians(-90) * player);
-    //text(sumString(loserStorage).substring(0, 15), 0, 0);
     popMatrix();
   }
 

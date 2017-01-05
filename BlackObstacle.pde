@@ -18,9 +18,9 @@ class BlackObstacle extends FSVGO {
     this.setFill(0);
     this.setFriction(0);
     this.setRestitution(1);
-    this.setNoStroke();
     
-    this.setNoFill();
+    //this.setNoFill();
+    this.setNoStroke();
 
     this.setRotation(120);
   }

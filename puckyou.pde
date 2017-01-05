@@ -1,11 +1,11 @@
 // pins {mic, button1, button2, left, right}
+// player class에서 레벨 빼자!!!
+// 사운드 인풋 관련 다 빼자!!!!
 
 int[] pins2 = {1, 2, 3, 5, 6};
 int[] pins1 = {0, 9, 8, 11, 10};
-
-import guru.ttslib.*;
-
-TTS tts;
+String p1_name = "Thomas";
+String p2_name = "John";
 
 import cc.arduino.*;
 import processing.serial.*;
@@ -14,29 +14,18 @@ import org.webbitserver.*;
 import fisica.*;
 import geomerative.*;
 
-
-int llll;
-
-
-import processing.sound.*;
-Amplitude amp;
-AudioIn in;
-
-
 Arduino arduino;
-
 WebSocketP5 socket1, socket2;
+FWorld world;
 
 int prePressed1 = 0;
 int prePressed2 = 0;
-
-FWorld world;
 
 ArrayList<Border> scoreBorders = new ArrayList<Border>();
 ArrayList<Border> borders = new ArrayList<Border>();
 ArrayList<WhiteObstacle> whiteObstacles = new ArrayList<WhiteObstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
-String[] oWordsStorage = {"", "Crap", "Shit"}; 
+String[] oWordsStorage = {"", "Shit", "Crap"}; 
 ArrayList<Ball> balls = new ArrayList<Ball>();
 
 Player p1, p2;
@@ -54,13 +43,6 @@ int bNum = 1;
 void setup() {
   size(1280, 640);
   smooth();
-
-
-
-  amp = new Amplitude(this);
-  in = new AudioIn(this, 0);
-  in.start();
-  amp.input(in);
 
   bg = loadImage("totalbg.jpg");
 
@@ -87,22 +69,15 @@ void setup() {
   renderObstacles();
 
   // player
-  p1 = new Player(pins1, -1, "Thomas");
-  p2 = new Player(pins2, 1, "John");
+  p1 = new Player(pins1, -1, p1_name);
+  p2 = new Player(pins2, 1, p2_name);
 
   // etc.
   font = createFont("ArialRoundedMTBold-48.vlw", 24);
   textFont(font);
-
-  tts = new TTS();
 }
 
-int tttt = 0;
-
 void draw() { 
-  //println(arduino.digitalRead(2), arduino.digitalRead(3), arduino.digitalRead(5), arduino.digitalRead(6));
-  llll = (int)amp.analyze()*10000;
-
   image(bg, 0, 0);
 
   p1.method();
@@ -114,32 +89,21 @@ void draw() {
   manageBalls();
   controlBallCreation();
   //controlBallCreationWithKey();
-
-  println(arduino.digitalRead(2), arduino.digitalRead(3), arduino.digitalRead(8), arduino.digitalRead(9));
 }
 
 void setArduino() {
   println(Arduino.list());
-  arduino = new Arduino(this, Arduino.list()[3], 57600);
+  arduino = new Arduino(this, Arduino.list()[2], 57600);
 
   for (int i = 1; i < 3; i++) {
     arduino.pinMode(pins1[i], Arduino.INPUT); // player 1
-    println(pins1[i]);
     arduino.pinMode(pins2[i], Arduino.INPUT); // player 2
-    println(pins2[i]);
   }
 
   for (int i = 3; i < 5; i++) {
-    //arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
-    //println(pins1[i]);
-    //arduino.pinMode(pins2[i], Arduino.SERVO); // player 2
-    //println(pins2[i]);
+    arduino.pinMode(pins1[i], Arduino.SERVO); // player 1
+    arduino.pinMode(pins2[i], Arduino.SERVO); // player 2
   }
-
-  arduino.pinMode(5, Arduino.SERVO); // player 2
-  arduino.pinMode(6, Arduino.SERVO); // player 2
-  arduino.pinMode(10, Arduino.SERVO); // player 2
-  arduino.pinMode(11, Arduino.SERVO); // player 2
 }
 
 void stop() {
@@ -221,12 +185,6 @@ void websocketOnMessage(WebSocketConnection con, String msg) {
 
   msg = split(msg, ']')[1];
 
-  //for(int i = 0; i < msg.length(); i++) {
-  //  if(msg.substring(i, i+3).equals("개**")) {
-  //  } 
-  //}
-
-
   int sob = msg.indexOf("개**");
   if (sob != -1) {
     msg = msg.substring(0, sob) + "개새끼" + msg.substring(sob+3, msg.length());
@@ -237,14 +195,7 @@ void websocketOnMessage(WebSocketConnection con, String msg) {
     msg = msg.substring(0, fuck) + "fuck" + msg.substring(fuck+4, msg.length());
   }
 
-  //if (msg.equals("개**")) {
-  //  msg = "개새끼";
-  //}
-  //else if (msg.equals("f***")) msg = "fuck";
-
   balls.add(new Ball(bId++, p.x, p.ballSlot, new PVector(p.player * -400, 0), msg));
-
-  tts.speak(msg);
 
   world.add((balls.get(balls.size() - 1)));
 }
@@ -258,12 +209,6 @@ void websocketOnClosed(WebSocketConnection con) {
 }
 
 void renderBorders() {
-  //borders.add(new Border(0, 0, width, 5));
-  //borders.add(new Border(0, height-1, width, 5));
-  //borders.add(new Border(0, 0, 1, height));
-  //borders.add(new Border(width, 0, 1, height));
-
-
   borders.add(new Border(72, 132, 201, 3, -45, true));
   borders.add(new Border(452, 63, 614, 3));
 
@@ -324,22 +269,15 @@ void renderScorescoreBorders() {
 void renderObstacles() {
   whiteObstacles.add(new WhiteObstacle());
   blackObstacles.add(new BlackObstacle());
-
-  float borderW = 600;
-
   whiteObstacles.add(new WhiteObstacle(1, 480, 168));
-  //whiteObstacles.add(new WhiteObstacle(2, 986, 359));
 
   for (int i = 1; i <= wNum; i++) {
-    //  whiteObstacles.add(new WhiteObstacle(i, random((width-borderW)/4, width - (width-borderW)/4), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(whiteObstacles.get(i));
   }
 
   blackObstacles.add(new BlackObstacle(1, 722, 341));
-  //blackObstacles.add(new BlackObstacle(2, 641, 375));
 
   for (int i = 1; i <= bNum; i++) {
-    //  blackObstacles.add(new BlackObstacle(i, random((width-borderW)/4, width - (width-borderW)/3), random((height-borderW)/4, height - (height-borderW)/4)));
     world.add(blackObstacles.get(i));
   }
 }
@@ -359,7 +297,6 @@ void contactEnded(FContact c) {
 
   if ((cId < 0) && cId > -1000) {
     int occupied = balls.get(bId).msgStorage.size();
-    //println(occupied);
 
     if (cId > -100) {  // white obstacle
       if (occupied < 4) balls.get(bId).msgStorage.add(oWordsStorage[-cId]);
@@ -408,4 +345,13 @@ String sumString(ArrayList<String> arrListString) {
 
 void mouseClicked() {
   println(mouseX, mouseY);
+}
+
+
+
+
+
+boolean isSwearingContained() {
+
+  return true;
 }

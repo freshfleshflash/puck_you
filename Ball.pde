@@ -55,7 +55,7 @@ class Ball extends FCircle {
         translate(r*cos(theta), r*sin(theta));
         rotate(theta+PI/2); 
         fill(0);
-        if(!finished) text(currentChar, 0, 0);
+        if (!finished) text(currentChar, 0, 0);
         popMatrix();
 
         arclength += w;

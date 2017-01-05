@@ -16,7 +16,7 @@ class LeftRacket extends FSVG {
     //this.setStroke(0, 0, 0);
     this.setFriction(0);    
     this.setRestitution(1);
-    
+
     this.setNoFill();
     this.setNoStroke();
   }
@@ -32,9 +32,6 @@ class LeftRacket extends FSVG {
   void testRotate() {
     testLevel++;
 
-    //if (testLevel > 180) test = -1;
-    //if (testLevel < 0) test = 1;
-    
     this.setRotation(-radians(testLevel));  
     arduino.servoWrite(pin, testLevel);
   }
