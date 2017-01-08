@@ -8,10 +8,11 @@ class Player {
   float slotGap = 288;
   String name;
   String insult = "";
-  ArrayList<String> insults = new ArrayList<String>();
+  ArrayList<Insult> insults = new ArrayList<Insult>();
 
   LeftRacket left;
   RightRacket right;
+  Charger charger;
 
   Player(int player, int[] pins, String name) {
     this.player = player;
@@ -23,10 +24,13 @@ class Player {
     this.slot = height/2 + slotGap * player;
     this.name = name;
 
-    left = new LeftRacket(player, 1, pin_left, x, y);
+    //left = new LeftRacket(player, 1, pin_left, x, y);
+    left = new LeftRacket(this, 1);
     world.add(left);
-    right = new RightRacket(player, -1, pin_right, x, y);
+    right = new RightRacket(this, -1);
     world.add(right);
+    
+    charger = new Charger(this);
   }
 
   void method() {
@@ -34,8 +38,9 @@ class Player {
     displayScores();
     displayInsult();
     detectLost();
+    charger.display();
   }
-  
+
   int flipperAng;
 
   void controlFlippers() {
@@ -71,7 +76,7 @@ class Player {
     pushStyle();
     textAlign(CENTER, CENTER);
     textSize(30);
-    fill(255);
+    fill(255, 233, 212);
     text(insult, 0, 0);
     popStyle();
     popMatrix();
@@ -91,8 +96,16 @@ class Player {
       pushStyle();
       textSize(25);
       textAlign(CENTER, CENTER);
-      fill(255, 0, 0);
-      text(this.name + " is " + sumString(insults), 0, 0);
+      fill(229, 71, 70);
+
+      String finalInsult = "";
+      for (int i = 0; i < insults.size(); i++) {
+        finalInsult += insults.get(i).words;
+      }
+
+      if (!insults.get(0).audio.isPlaying()) insults.get(0).audio.play();
+
+      text(this.name + " is " + finalInsult, 0, 0);
       popStyle();
       popMatrix();
     }

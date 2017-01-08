@@ -20,10 +20,8 @@ class Ball extends FCircle {
     this.setRestitution(1);  
     this.setFriction(0);
     this.setDamping(0);
-
     this.setPosition(player.x, player.slot);
-    this.setVelocity(-500 * player.player, 0);
-
+    this.setVelocity(-1000 * player.player, 0);
     this.setNoStroke();
     this.setNoFill();
   }

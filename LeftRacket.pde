@@ -1,19 +1,19 @@
 class LeftRacket extends FSVG {
 
-  int player, dir, pin;
+  int player, pin, dir;
 
-  LeftRacket(int player, int dir, int pin, float px, float py) {
-    super(player, dir);
+  LeftRacket(Player player, int dir) {
+    super(player.player, dir);
 
-    this.player = player;
+    this.player = player.player;
+    this.pin = player.pin_left;
     this.dir = dir;
-    this.pin = pin;
 
     this.setStatic(true);
     this.setFriction(0);    
     this.setRestitution(1);
-    this.setPosition(px, py);
-    this.adjustPosition(100 * player, 135 * dir * player);
+    this.setPosition(player.x, player.y);
+    this.adjustPosition(100 * player.player, 135 * dir * player.player);
     //this.adjustRotation(30);
     //this.setNoFill();
     this.setNoStroke();

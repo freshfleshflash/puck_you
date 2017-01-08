@@ -5,20 +5,15 @@ int[] pins2 = {8, 9, 10, 11};
 
 import cc.arduino.*;
 import processing.serial.*;
-
 import ddf.minim.*;
 import ddf.minim.ugens.*;
-
 import muthesius.net.*;
 import org.webbitserver.*;
-
 import fisica.*;
 import geomerative.*;
 
 boolean finished = false;
-
 Player p1, p2;
-
 PImage bg;
 
 void setup() {
@@ -84,7 +79,7 @@ void setAudio() {
   in = minim.getLineIn(Minim.STEREO, 2048);
   bleep = minim.loadFile("sound/bleep.wav");
   goal = minim.loadFile("sound/goal.mp3");
-  giggle = minim.loadFile("sound/bleep.wav");
+  giggle = minim.loadFile("sound/giggle.wav");
 }
 
 // socket & ball creation
@@ -128,14 +123,14 @@ void controlConnection() {
 
 int ballId = 0;
 
-//void websocketOnMessage(WebSocketConnection con, String msg) {
-//  println("[websocketOnMessage] " + msg);
-//  recorder.save();
-//  recordId++;
+void websocketOnMessage(WebSocketConnection con, String msg) {
+  println("[websocketOnMessage] " + msg);
+  recorder.save();
+  recordId++;
 
-//  balls.add(new Ball(ballId++, occupyingPlayer, msg));
-//  world.add(balls.get(balls.size() - 1));
-//}
+  balls.add(new Ball(ballId++, occupyingPlayer, msg));
+  world.add(balls.get(balls.size() - 1));
+}
 
 // test
 void keyReleased() {  
@@ -143,19 +138,23 @@ void keyReleased() {
   if (!occupied && (inputKey == p1.pin_b2 || inputKey == p2.pin_b2)) {
     occupyingPlayer = (inputKey == p1.pin_b2) ? p1 : p2;
     occupied = true;
+    occupyingPlayer.charger.charging = true;
+    occupyingPlayer.charger.chargingTime = frameCount;
     socket.broadcast("start");
     recorder = minim.createRecorder(in, "audio/" + recordId + ".wav");
     recorder.beginRecord();
   } else if (occupied && (inputKey == occupyingPlayer.pin_b2)) {
     socket.broadcast("stop");
     occupied = false;
+    occupyingPlayer.charger.charging = false;
+    occupyingPlayer.charger.chargingTime = 0;
     recorder.endRecord();
     ////
-    recorder.save();
-    recordId++;
+    //recorder.save();
+    //recordId++;
 
-    balls.add(new Ball(ballId++, occupyingPlayer, "test test"));
-    world.add(balls.get(balls.size() - 1));
+    //balls.add(new Ball(ballId++, occupyingPlayer, "test test"));
+    //world.add(balls.get(balls.size() - 1));
     ////
   }
 }
@@ -270,7 +269,7 @@ void contactEnded(FContact c) {
     String insult = sumString(balls.get(ballId).words);
     Player player = (objectId == -1001) ? p1 : p2 ;    
     player.insult = insult;
-    player.insults.add(insult);
+    player.insults.add(new Insult(ballId, insult, minim.loadFile("audio/" + ballId + ".wav")));
     player.displayingInsultCount = frameCount;
     player.score--;
 
@@ -298,16 +297,23 @@ void contactEnded(FContact c) {
 
   // flippers
   if (objectId == 10000) {
-    giggle.play();
-    giggle.rewind();
+    //playAudioWithSound(giggle, balls.get(ballId).audio);
   }
 }
 
 void playAudioWithSound(AudioPlayer sound, AudioPlayer audio) {
-  sound.play();
-  sound.rewind();
-  audio.play();
-  audio.rewind();
+  sound.setVolume(0.7);
+  audio.setVolume(1);
+
+  if (finished) {
+    sound.pause();
+    audio.pause();
+  } else {
+    sound.play();
+    sound.rewind();
+    audio.play();
+    audio.rewind();
+  }
 }
 
 String sumString(ArrayList<String> arrListString) {
