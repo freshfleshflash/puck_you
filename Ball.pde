@@ -3,19 +3,17 @@ class Ball extends FCircle {
 
   ArrayList<String> words = new ArrayList<String>();
 
-  float size = 100;
+  float size = 50;
   boolean removed = false;
-  //boolean soundPlayed = false;
 
   AudioPlayer audio;
 
   Ball(int id, Player player, String msg) {
-    super(100);
+    super(50);
 
     this.id = id;
-
-    this.words.add(msg);
-    audio = minim.loadFile(id + ".wav");
+    this.words.add(msg.toUpperCase());
+    audio = minim.loadFile("audio/" + id + ".wav");
 
     this.setGroupIndex(id);
     this.setAllowSleeping(false);
@@ -24,7 +22,7 @@ class Ball extends FCircle {
     this.setDamping(0);
 
     this.setPosition(player.x, player.slot);
-    this.setVelocity(-300 * player.player, 0);
+    this.setVelocity(-500 * player.player, 0);
 
     this.setNoStroke();
     this.setNoFill();
@@ -70,18 +68,4 @@ class Ball extends FCircle {
 
     popMatrix();
   }
-
-  //void playSound() {
-  //  if (soundPlayed) {
-  //    if (!ding.isPlaying()) ding.play();
-  //    if (ding.position() == ding.length()) {
-  //      if (!audio.isPlaying()) {
-  //        audio.play();      
-  //        audio.rewind();
-  //        ding.rewind();
-  //        soundPlayed = false;
-  //      }
-  //    }
-  //  }
-  //}
 }

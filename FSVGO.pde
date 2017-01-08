@@ -6,6 +6,7 @@ class FSVGO extends FPoly {
 
   FSVGO() {
     super();
+
     this.setStatic(true);
 
     RShape fullSvg = RG.loadShape("fff.svg");

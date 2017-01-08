@@ -1,33 +1,49 @@
 class Player {
 
   int pin_b1, pin_b2, pin_left, pin_right, player, displayingInsultCount;
-  int score = 10;
+  int score = 6;
   float x, slot;
   float y = height/2;
   float xGap = 400;
-  float slotGap = 287;
+  float slotGap = 288;
   String name;
   String insult = "";
   ArrayList<String> insults = new ArrayList<String>();
 
+  LeftRacket left;
+  RightRacket right;
+
   Player(int player, int[] pins, String name) {
     this.player = player;
-
     this.pin_b1 = pins[0];
     this.pin_b2 = pins[1];
     this.pin_left = pins[2];
     this.pin_right = pins[3];
-
     this.x = width/2 + xGap * player;
     this.slot = height/2 + slotGap * player;
-
     this.name = name;
+
+    left = new LeftRacket(player, 1, pin_left, x, y);
+    world.add(left);
+    right = new RightRacket(player, -1, pin_right, x, y);
+    world.add(right);
   }
 
   void method() {
+    controlFlippers();
     displayScores();
     displayInsult();
     detectLost();
+  }
+  
+  int flipperAng;
+
+  void controlFlippers() {
+    if (arduino.digitalRead(pin_b2) == 3 || (keyPressed && key == ENTER)) flipperAng += 10;
+    else flipperAng = 0;
+
+    left.rotate_(constrain(flipperAng, 30, 120));  
+    right.rotate_(constrain(flipperAng, 30, 120));
   }
 
   void displayScores() {
@@ -35,9 +51,9 @@ class Player {
 
     for (int i = 0; i < score; i++) {
       pushStyle();
-      fill(255);
+      fill(0, 120, 131);
       noStroke();
-      ellipse(width/2 + (612 + i * -19) * player, height/2 + 287 * player, r, r);  
+      ellipse(width/2 + (612 + i * -19) * player, height/2 + slotGap * player, r, r);  
       popStyle();
     }
   }

@@ -7,9 +7,7 @@ class Border extends FBox {
     this.setFriction(0);
     this.setDensity(10);
     this.setRestitution(1);
-
     this.setPosition(x, y);
-
     this.setNoFill();
     this.setNoStroke();
   }
@@ -21,10 +19,8 @@ class Border extends FBox {
     this.setFriction(0);
     this.setDensity(10);
     this.setRestitution(1);
-
     this.setPosition(x, y);
     this.setRotation(radians(ang));
-
     this.setNoFill();
     this.setNoStroke();
   }
@@ -36,13 +32,10 @@ class Border extends FBox {
     this.setGroupIndex(id); 
     this.setStatic(true);
     this.setFriction(0);
-
     this.setPosition(x, y);
     this.setDensity(10);
     this.setRestitution(1);
-
-    this.setFill(0, 255, 0);
-    //this.setNoFill();  
+    this.setNoFill();  
     this.setNoStroke();
   }
 }

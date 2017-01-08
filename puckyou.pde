@@ -25,7 +25,7 @@ void setup() {
   size(1280, 640);
   smooth();
 
-  bg = loadImage("bg.jpg");
+  bg = loadImage("bg2.jpg");
   textFont(createFont("ArialRoundedMTBold-48.vlw", 24));
 
   setArduino();
@@ -77,12 +77,14 @@ void testArduino() {
 Minim minim;
 AudioInput in;
 AudioRecorder recorder;
-AudioPlayer ding;
+AudioPlayer bleep, goal, giggle;
 
 void setAudio() {
   minim = new Minim(this);
   in = minim.getLineIn(Minim.STEREO, 2048);
-  ding = minim.loadFile("ding.wav");
+  bleep = minim.loadFile("sound/bleep.wav");
+  goal = minim.loadFile("sound/goal.mp3");
+  giggle = minim.loadFile("sound/bleep.wav");
 }
 
 // socket & ball creation
@@ -126,14 +128,14 @@ void controlConnection() {
 
 int ballId = 0;
 
-void websocketOnMessage(WebSocketConnection con, String msg) {
-  println("[websocketOnMessage] " + msg);
-  recorder.save();
-  recordId++;
+//void websocketOnMessage(WebSocketConnection con, String msg) {
+//  println("[websocketOnMessage] " + msg);
+//  recorder.save();
+//  recordId++;
 
-  balls.add(new Ball(ballId++, occupyingPlayer, msg));
-  world.add(balls.get(balls.size() - 1));
-}
+//  balls.add(new Ball(ballId++, occupyingPlayer, msg));
+//  world.add(balls.get(balls.size() - 1));
+//}
 
 // test
 void keyReleased() {  
@@ -142,18 +144,18 @@ void keyReleased() {
     occupyingPlayer = (inputKey == p1.pin_b2) ? p1 : p2;
     occupied = true;
     socket.broadcast("start");
-    recorder = minim.createRecorder(in, recordId + ".wav");
+    recorder = minim.createRecorder(in, "audio/" + recordId + ".wav");
     recorder.beginRecord();
   } else if (occupied && (inputKey == occupyingPlayer.pin_b2)) {
     socket.broadcast("stop");
     occupied = false;
     recorder.endRecord();
     ////
-    //recorder.save();
-    //recordId++;
+    recorder.save();
+    recordId++;
 
-    //balls.add(new Ball(ballId++, occupyingPlayer, "fuckyou"));
-    //world.add(balls.get(balls.size() - 1));
+    balls.add(new Ball(ballId++, occupyingPlayer, "test test"));
+    world.add(balls.get(balls.size() - 1));
     ////
   }
 }
@@ -162,7 +164,6 @@ void manageBalls() {
   for (int i = 0; i < balls.size(); i++) {
     if (balls.get(i) == null) break;
     balls.get(i).display();
-    //balls.get(i).playSound();
   }
 }
 
@@ -226,7 +227,7 @@ void renderBorders() {
 ArrayList<Border> goalPosts = new ArrayList<Border>();
 
 void renderGoalPosts() {
-  float w = 250;
+  float w = 245;
   float h = 20; 
 
   goalPosts.add(new Border(-1001, 0, height/2, h, w));
@@ -241,7 +242,6 @@ ArrayList<WhiteObstacle> whiteObstacles = new ArrayList<WhiteObstacle>();
 ArrayList<BlackObstacle> blackObstacles = new ArrayList<BlackObstacle>();
 
 void renderObstacles() {
-  // dummy
   whiteObstacles.add(new WhiteObstacle()); 
   whiteObstacles.add(new WhiteObstacle(1, 480, 168));
 
@@ -257,20 +257,16 @@ void renderObstacles() {
   }
 }
 
-String[] presetWords = {"", "Shit", "Crap"}; 
+String[] presetWords = {"", "SHIT", "CRAP"}; 
 
 void contactEnded(FContact c) {
   int objectId = c.getBody1().getGroupIndex();
   int ballId = c.getBody2().getGroupIndex();
 
-  //balls.get(ballId).soundPlayed = true;
-  ding.play();
-  ding.rewind();
-  balls.get(ballId).audio.play();
-  balls.get(ballId).audio.rewind();
-
   // goalPost
   if ((objectId == -1001) || (objectId == -1002)) { 
+    playAudioWithSound(goal, balls.get(ballId).audio);
+
     String insult = sumString(balls.get(ballId).words);
     Player player = (objectId == -1001) ? p1 : p2 ;    
     player.insult = insult;
@@ -282,7 +278,10 @@ void contactEnded(FContact c) {
     world.remove(balls.get(ballId));
   }
 
+  // obastacles
   if ((objectId < 0) && objectId > -1000) {
+    playAudioWithSound(bleep, balls.get(ballId).audio);
+
     int wordsSize = balls.get(ballId).words.size();
 
     if (objectId > -100) {  // white obstacle
@@ -296,6 +295,19 @@ void contactEnded(FContact c) {
       }
     }
   }
+
+  // flippers
+  if (objectId == 10000) {
+    giggle.play();
+    giggle.rewind();
+  }
+}
+
+void playAudioWithSound(AudioPlayer sound, AudioPlayer audio) {
+  sound.play();
+  sound.rewind();
+  audio.play();
+  audio.rewind();
 }
 
 String sumString(ArrayList<String> arrListString) {
