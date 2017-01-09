@@ -15,14 +15,12 @@ class Charger {
     float w = 10;
     float h = 15;
 
-    int num = 18;
+    int num = 17;
     int step = 0;
     int duration = 20;
 
-    if (charging) {
-      step = ((int)(frameCount - chargingTime) / duration) % num;
-    }
-
+    if (charging) step = ((int)(frameCount - chargingTime) / duration) % num;
+    
     pushMatrix();
     translate(x, y);
     pushStyle();
@@ -34,7 +32,7 @@ class Charger {
       pushMatrix();
       reCoordinate(i);
       shearX(-PI/5);
-      if (charging && i <= step) fill(0);
+      if (!finished && charging && i <= step) fill(0);
       else fill(255, 233, 212); 
       rect(0, 0, w, h);
       popMatrix();
@@ -44,7 +42,7 @@ class Charger {
       pushMatrix();
       reCoordinate(i);
       shearX(PI/5);      
-      if (charging && i <= step) fill(0);
+      if (!finished && charging && i <= step) fill(0);
       else fill(255, 233, 212); 
       rect(0, 0, w, -h);
       popMatrix();
@@ -66,12 +64,14 @@ class Charger {
       a = 4;
       b = 14;
       ang = 30;
-    } else if (id == 16) {
-      a = -12;
-      b = 47;
-      ang = 53;
-    } else if (id == 17) {
-      a = -47;
+    } 
+    //else if (id == 16) {
+    //  a = -12;
+    //  b = 47;
+    //  ang = 53;
+    //} 
+    else if (id == 16) {
+      a = 0;
       b = 87;
       ang = 90;
     } 

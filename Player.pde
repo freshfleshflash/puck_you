@@ -1,7 +1,7 @@
 class Player {
 
   int pin_b1, pin_b2, pin_left, pin_right, player, displayingInsultCount;
-  int score = 6;
+  int score = 3;
   float x, slot;
   float y = height/2;
   float xGap = 400;
@@ -24,12 +24,11 @@ class Player {
     this.slot = height/2 + slotGap * player;
     this.name = name;
 
-    //left = new LeftRacket(player, 1, pin_left, x, y);
     left = new LeftRacket(this, 1);
     world.add(left);
     right = new RightRacket(this, -1);
     world.add(right);
-    
+
     charger = new Charger(this);
   }
 
@@ -66,9 +65,7 @@ class Player {
   void displayInsult() {
     if (finished) insult = "";
 
-    if (frameCount > displayingInsultCount + 90) {
-      insult = "";
-    }
+    if (frameCount > displayingInsultCount + 90) insult = "";
 
     pushMatrix();
     translate(width/2 + 400 * player, y);
@@ -91,7 +88,7 @@ class Player {
 
       pushMatrix();
       translate(width/2, height/2);
-      rotate(radians(finalInsultAng));
+      //rotate(radians(finalInsultAng));
       finalInsultAng++;
       pushStyle();
       textSize(25);
@@ -103,11 +100,21 @@ class Player {
         finalInsult += insults.get(i).words;
       }
 
-      if (!insults.get(0).audio.isPlaying()) insults.get(0).audio.play();
-
       text(this.name + " is " + finalInsult, 0, 0);
       popStyle();
       popMatrix();
+
+      int trackId = 0;  
+      while (trackId < insults.size()) {
+        if (insults.get(trackId).audio.isPlaying()) {
+          insults.get(trackId).audio.pause();
+        } else if (insults.get(trackId).audio.position() == insults.get(trackId).audio.length()) {
+          insults.get(trackId).audio.rewind();
+          trackId++;
+        } else {
+          insults.get(trackId).audio.play();
+        }
+      }
     }
   }
 }

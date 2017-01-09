@@ -7,6 +7,7 @@ import cc.arduino.*;
 import processing.serial.*;
 import ddf.minim.*;
 import ddf.minim.ugens.*;
+import guru.ttslib.*;
 import muthesius.net.*;
 import org.webbitserver.*;
 import fisica.*;
@@ -15,12 +16,14 @@ import geomerative.*;
 boolean finished = false;
 Player p1, p2;
 PImage bg;
+PShape fff;
 
 void setup() {
   size(1280, 640);
   smooth();
 
-  bg = loadImage("bg2.jpg");
+  bg = loadImage("bg3.jpg");
+  fff = loadShape("fff.svg");
   textFont(createFont("ArialRoundedMTBold-48.vlw", 24));
 
   setArduino();
@@ -44,7 +47,7 @@ void draw() {
   p1.method();
   p2.method();
 
-  manageBalls();
+  manageComponents();
 }
 
 // arduino
@@ -73,6 +76,7 @@ Minim minim;
 AudioInput in;
 AudioRecorder recorder;
 AudioPlayer bleep, goal, giggle;
+TTS tts;
 
 void setAudio() {
   minim = new Minim(this);
@@ -80,6 +84,7 @@ void setAudio() {
   bleep = minim.loadFile("sound/bleep.wav");
   goal = minim.loadFile("sound/goal.mp3");
   giggle = minim.loadFile("sound/giggle.wav");
+  tts = new TTS();
 }
 
 // socket & ball creation
@@ -123,14 +128,14 @@ void controlConnection() {
 
 int ballId = 0;
 
-void websocketOnMessage(WebSocketConnection con, String msg) {
-  println("[websocketOnMessage] " + msg);
-  recorder.save();
-  recordId++;
+//void websocketOnMessage(WebSocketConnection con, String msg) {
+//  println("[websocketOnMessage] " + msg);
+//  recorder.save();
+//  recordId++;
 
-  balls.add(new Ball(ballId++, occupyingPlayer, msg));
-  world.add(balls.get(balls.size() - 1));
-}
+//  balls.add(new Ball(ballId++, occupyingPlayer, msg));
+//  world.add(balls.get(balls.size() - 1));
+//}
 
 // test
 void keyReleased() {  
@@ -150,19 +155,29 @@ void keyReleased() {
     occupyingPlayer.charger.chargingTime = 0;
     recorder.endRecord();
     ////
-    //recorder.save();
-    //recordId++;
+    recorder.save();
+    recordId++;
 
-    //balls.add(new Ball(ballId++, occupyingPlayer, "test test"));
-    //world.add(balls.get(balls.size() - 1));
+    balls.add(new Ball(ballId++, occupyingPlayer, "test test"));
+    world.add(balls.get(balls.size() - 1));
     ////
   }
 }
 
-void manageBalls() {
+void manageComponents() {
   for (int i = 0; i < balls.size(); i++) {
     if (balls.get(i) == null) break;
     balls.get(i).display();
+  }
+
+  for (int i = 1; i < whiteObstacles.size(); i++) {
+    if (whiteObstacles.get(i) == null) break;
+    whiteObstacles.get(i).displaySquare();
+  }
+
+  for (int i = 1; i < blackObstacles.size(); i++) {
+    if (blackObstacles.get(i) == null) break;
+    blackObstacles.get(i).displaySquare();
   }
 }
 
@@ -284,8 +299,16 @@ void contactEnded(FContact c) {
     int wordsSize = balls.get(ballId).words.size();
 
     if (objectId > -100) {  // white obstacle
-      if (wordsSize < 4) balls.get(ballId).words.add(presetWords[-objectId]);
+      whiteObstacles.get(-objectId).squareDisplayed = true;
+      whiteObstacles.get(-objectId).displayingSquareTime = frameCount;  
+
+      if (wordsSize < 4) {
+        balls.get(ballId).words.add(presetWords[-objectId]);
+      }
     } else {                // black obstacle
+      blackObstacles.get(-objectId/100).squareDisplayed = true;
+      blackObstacles.get(-objectId/100).displayingSquareTime = frameCount;  
+
       if (wordsSize > 1) {
         balls.get(ballId).words.remove(balls.get(ballId).words.size() - 1);
       } else {     
@@ -302,9 +325,6 @@ void contactEnded(FContact c) {
 }
 
 void playAudioWithSound(AudioPlayer sound, AudioPlayer audio) {
-  sound.setVolume(0.7);
-  audio.setVolume(1);
-
   if (finished) {
     sound.pause();
     audio.pause();
