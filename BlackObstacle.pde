@@ -37,7 +37,7 @@ class BlackObstacle extends FSVGO {
       pushStyle();
       fff.disableStyle();
       strokeWeight(20);
-      stroke(255, 0, 0);
+      stroke(229, 71, 70);
       noFill();
       shape(fff, 0, 0, w, h);
       popStyle();      

@@ -17,6 +17,7 @@ boolean finished = false;
 Player p1, p2;
 PImage bg;
 PShape fff;
+final int totalScore = 6;
 
 void setup() {
   size(1280, 640);
@@ -24,7 +25,7 @@ void setup() {
 
   bg = loadImage("bg3.jpg");
   fff = loadShape("fff.svg");
-  textFont(createFont("ArialRoundedMTBold-48.vlw", 24));
+  textFont(createFont("HelveticaNeue-Bold-48.vlw", 48));
 
   setArduino();
   setAudio();
@@ -38,7 +39,7 @@ void setup() {
 void draw() {
   image(bg, 0, 0);
 
-  //testArduino();
+  testArduino();
   //controlConnection();
 
   world.draw();
@@ -113,29 +114,36 @@ Player occupyingPlayer;
 int recordId = 0;
 
 void controlConnection() {
-  if (!occupied && (arduino.digitalRead(p1.pin_b1) - int(occupied) == 1 || arduino.digitalRead(p2.pin_b1) - int(occupied) == 1)) { 
-    occupyingPlayer = (arduino.digitalRead(p1.pin_b1) - int(occupied) == 1) ? p1 : p2;
+  if (!occupied && (arduino.digitalRead(p1.pin_b2) - int(occupied) == 1 || arduino.digitalRead(p2.pin_b2) - int(occupied) == 1)) { 
+    occupyingPlayer = (arduino.digitalRead(p1.pin_b2) - int(occupied) == 1) ? p1 : p2;
     occupied = true;
+    occupyingPlayer.charger.charging = true;
+    occupyingPlayer.charger.chargingTime = frameCount;
     socket.broadcast("start");
-    recorder = minim.createRecorder(in, recordId + ".wav");
+    recorder = minim.createRecorder(in, "audio/" + recordId + ".wav");
     recorder.beginRecord();
-  } else if (occupied && arduino.digitalRead(occupyingPlayer.pin_b1) - int(occupied) == -1) {
+  } else if (occupied && arduino.digitalRead(occupyingPlayer.pin_b2) - int(occupied) == -1) {
     socket.broadcast("stop");
     occupied = false;
+    occupyingPlayer.charger.charging = false;
+    occupyingPlayer.charger.chargingTime = 0;
     recorder.endRecord();
   }
 }
 
 int ballId = 0;
 
-//void websocketOnMessage(WebSocketConnection con, String msg) {
-//  println("[websocketOnMessage] " + msg);
-//  recorder.save();
-//  recordId++;
+void websocketOnMessage(WebSocketConnection con, String msg) {
+  println("[websocketOnMessage] " + msg);
 
-//  balls.add(new Ball(ballId++, occupyingPlayer, msg));
-//  world.add(balls.get(balls.size() - 1));
-//}
+  if (filterWords(msg)) {
+    recorder.save();
+    recordId++;
+
+    balls.add(new Ball(ballId++, occupyingPlayer, msg));
+    world.add(balls.get(balls.size() - 1));
+  }
+}
 
 // test
 void keyReleased() {  
@@ -158,7 +166,7 @@ void keyReleased() {
     recorder.save();
     recordId++;
 
-    balls.add(new Ball(ballId++, occupyingPlayer, "test test"));
+    balls.add(new Ball(ballId++, occupyingPlayer, "테스트 테스트"));
     world.add(balls.get(balls.size() - 1));
     ////
   }
@@ -281,10 +289,19 @@ void contactEnded(FContact c) {
   if ((objectId == -1001) || (objectId == -1002)) { 
     playAudioWithSound(goal, balls.get(ballId).audio);
 
-    String insult = sumString(balls.get(ballId).words);
     Player player = (objectId == -1001) ? p1 : p2 ;    
-    player.insult = insult;
-    player.insults.add(new Insult(ballId, insult, minim.loadFile("audio/" + ballId + ".wav")));
+    player.insult = sumString(balls.get(ballId).words);
+
+    for (int i = 0; i < balls.get(ballId).words.size(); i++) {
+      if (i == 0) player.insults.add(new Insult(ballId, balls.get(ballId).words.get(i), minim.loadFile("audio/" + ballId + ".wav")));    
+      else player.insults.add(new Insult(-101, "SHIT", tts));
+    }
+
+    //String insult = sumString(balls.get(ballId).words);
+    //Player player = (objectId == -1001) ? p1 : p2 ;    
+    //player.insult = insult;
+    //player.insults.add(new Insult(ballId, insult, minim.loadFile("audio/" + ballId + ".wav")));
+
     player.displayingInsultCount = frameCount;
     player.score--;
 
@@ -334,6 +351,15 @@ void playAudioWithSound(AudioPlayer sound, AudioPlayer audio) {
     audio.play();
     audio.rewind();
   }
+}
+
+String[] swearWords = {"arse", "ass", "asshole", "bastard", "bitch", "bloody", "bollocks", "crap", "cunt", "damn", "fuck", "hell", "Judas Priest", "nigga", "nigger", "shit", "whore"};
+
+boolean filterWords(String words) {
+  for (int i = 0; i < swearWords.length; i++) {
+    if (words.indexOf(swearWords[i]) > -1) return true;
+  }  
+  return false;
 }
 
 String sumString(ArrayList<String> arrListString) {

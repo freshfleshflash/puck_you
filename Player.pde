@@ -1,7 +1,7 @@
 class Player {
 
   int pin_b1, pin_b2, pin_left, pin_right, player, displayingInsultCount;
-  int score = 3;
+  int score = totalScore;
   float x, slot;
   float y = height/2;
   float xGap = 400;
@@ -30,6 +30,7 @@ class Player {
     world.add(right);
 
     charger = new Charger(this);
+    insults.add(new Insult(-50000, name + " is", tts));
   }
 
   void method() {
@@ -43,7 +44,7 @@ class Player {
   int flipperAng;
 
   void controlFlippers() {
-    if (arduino.digitalRead(pin_b2) == 3 || (keyPressed && key == ENTER)) flipperAng += 10;
+    if (arduino.digitalRead(pin_b2) == 0 && (arduino.digitalRead(pin_b1) == 1 || (keyPressed && key == ENTER))) flipperAng += 10;
     else flipperAng = 0;
 
     left.rotate_(constrain(flipperAng, 30, 120));  
@@ -79,7 +80,7 @@ class Player {
     popMatrix();
   }
 
-  float finalInsultAng;
+  //float finalInsultAng;
 
   void detectLost() {
     if (score == 0) {
@@ -87,32 +88,41 @@ class Player {
       finished = true;
 
       pushMatrix();
-      translate(width/2, height/2);
+      translate(width/2 + 400 * player, y);
+      rotate(radians(-90) * player);
+      //translate(width/2, height/2);
       //rotate(radians(finalInsultAng));
-      finalInsultAng++;
+      //finalInsultAng++;
       pushStyle();
-      textSize(25);
+      textSize(15);
       textAlign(CENTER, CENTER);
       fill(229, 71, 70);
 
       String finalInsult = "";
       for (int i = 0; i < insults.size(); i++) {
-        finalInsult += insults.get(i).words;
+        finalInsult += insults.get(i).words + " ";
       }
 
-      text(this.name + " is " + finalInsult, 0, 0);
+      text(finalInsult, 0, 0);
       popStyle();
       popMatrix();
 
       int trackId = 0;  
       while (trackId < insults.size()) {
-        if (insults.get(trackId).audio.isPlaying()) {
-          insults.get(trackId).audio.pause();
-        } else if (insults.get(trackId).audio.position() == insults.get(trackId).audio.length()) {
-          insults.get(trackId).audio.rewind();
-          trackId++;
+        Insult insult = insults.get(trackId);
+
+        if (insult.recordId >= 0) {
+          if (insult.audio.isPlaying()) {
+            insult.audio.pause();
+          } else if (insult.audio.position() == insult.audio.length()) {
+            insult.audio.rewind();
+            trackId++;
+          } else {
+            insult.audio.play();
+          }
         } else {
-          insults.get(trackId).audio.play();
+          insult.tts.speak(insult.words);
+          trackId++;
         }
       }
     }
