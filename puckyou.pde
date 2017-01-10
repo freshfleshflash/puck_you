@@ -1,7 +1,7 @@
 // pins {b1, b2, left, right}
 
 int[] pins1 = {2, 3, 5, 6};
-int[] pins2 = {8, 9, 10, 11};
+int[] pins2 = {9, 8, 10, 11};
 
 import cc.arduino.*;
 import processing.serial.*;
@@ -17,7 +17,7 @@ boolean finished = false;
 Player p1, p2;
 PImage bg;
 PShape fff;
-final int totalScore = 6;
+final int totalScore = 2;
 
 void setup() {
   size(1280, 640);
@@ -32,15 +32,15 @@ void setup() {
   setSocket();
   setWorld();
 
-  p1 = new Player(-1, pins1, "John");
-  p2 = new Player(1, pins2, "Peter");
+  p1 = new Player(-1, pins1, "Sarah");
+  p2 = new Player(1, pins2, "Anna");
 }
 
 void draw() {
   image(bg, 0, 0);
 
-  testArduino();
-  //controlConnection();
+  //testArduino();
+  controlConnection();
 
   world.draw();
   world.step();
@@ -136,6 +136,16 @@ int ballId = 0;
 void websocketOnMessage(WebSocketConnection con, String msg) {
   println("[websocketOnMessage] " + msg);
 
+  int fuck = msg.indexOf("f***");
+  int asshole = msg.indexOf("a******");
+  int bitch = msg.indexOf("b****");
+  int bullshit = msg.indexOf("b*******");
+
+  if (fuck != -1) msg = msg.substring(0, fuck) + "fuck" + msg.substring(fuck+4, msg.length());
+  if (asshole != -1) msg = msg.substring(0, asshole) + "asshole" + msg.substring(asshole+6, msg.length());
+  if (bitch != -1) msg = msg.substring(0, bitch) + "bitch" + msg.substring(bitch+5, msg.length());
+  if (bullshit != -1) msg = msg.substring(0, bullshit) + "bullshit" + msg.substring(bullshit+8, msg.length());
+
   if (filterWords(msg)) {
     recorder.save();
     recordId++;
@@ -163,11 +173,11 @@ void keyReleased() {
     occupyingPlayer.charger.chargingTime = 0;
     recorder.endRecord();
     ////
-    recorder.save();
-    recordId++;
+    //recorder.save();
+    //recordId++;
 
-    balls.add(new Ball(ballId++, occupyingPlayer, "테스트 테스트"));
-    world.add(balls.get(balls.size() - 1));
+    //balls.add(new Ball(ballId++, occupyingPlayer, "TEST"));
+    //world.add(balls.get(balls.size() - 1));
     ////
   }
 }
@@ -202,7 +212,7 @@ void setWorld() {
   world.setEdgesFriction(0);
   world.setEdgesRestitution(1);
 
-  //renderBorders();
+  renderBorders();
   renderGoalPosts();
   renderObstacles();
 }
@@ -279,7 +289,7 @@ void renderObstacles() {
   }
 }
 
-String[] presetWords = {"", "SHIT", "CRAP"}; 
+String[] presetWords = {"", "SHIT", "HELL"}; 
 
 void contactEnded(FContact c) {
   int objectId = c.getBody1().getGroupIndex();
@@ -342,6 +352,9 @@ void contactEnded(FContact c) {
 }
 
 void playAudioWithSound(AudioPlayer sound, AudioPlayer audio) {
+  sound.setGain(2);
+  audio.setGain(10);
+
   if (finished) {
     sound.pause();
     audio.pause();
@@ -359,7 +372,7 @@ boolean filterWords(String words) {
   for (int i = 0; i < swearWords.length; i++) {
     if (words.indexOf(swearWords[i]) > -1) return true;
   }  
-  return false;
+  return true;
 }
 
 String sumString(ArrayList<String> arrListString) {

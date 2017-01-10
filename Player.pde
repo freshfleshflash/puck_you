@@ -37,8 +37,8 @@ class Player {
     controlFlippers();
     displayScores();
     displayInsult();
-    detectLost();
     charger.display();
+    detectLost();
   }
 
   int flipperAng;
@@ -74,13 +74,14 @@ class Player {
     pushStyle();
     textAlign(CENTER, CENTER);
     textSize(30);
-    fill(255, 233, 212);
+    //fill(255, 233, 212);
+    fill(0);
     text(insult, 0, 0);
     popStyle();
     popMatrix();
   }
 
-  //float finalInsultAng;
+  float finalInsultAng;
 
   void detectLost() {
     if (score == 0) {
@@ -88,13 +89,13 @@ class Player {
       finished = true;
 
       pushMatrix();
-      translate(width/2 + 400 * player, y);
-      rotate(radians(-90) * player);
-      //translate(width/2, height/2);
-      //rotate(radians(finalInsultAng));
-      //finalInsultAng++;
+      //translate(width/2 + 400 * player, y);
+      //rotate(radians(-90) * player);
+      translate(width/2, height/2);
+      rotate(radians(finalInsultAng));
+      finalInsultAng += 10;
       pushStyle();
-      textSize(15);
+      textSize(25);
       textAlign(CENTER, CENTER);
       fill(229, 71, 70);
 

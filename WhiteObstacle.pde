@@ -21,8 +21,8 @@ class WhiteObstacle extends FSVGO {
     this.setRestitution(1);
     this.setPosition(x, y);
     this.setRotation(ang);
-    this.setFill(255);
-    //this.setNoFill();
+    //this.setFill(255);
+    this.setNoFill();
     this.setNoStroke();
   }
 
@@ -36,7 +36,7 @@ class WhiteObstacle extends FSVGO {
       rotate(ang);
       pushStyle();
       fff.disableStyle();
-      strokeWeight(20);
+      strokeWeight(25);
       stroke(229, 71, 70);
       noFill();
       shape(fff, 0, 0, w, h);

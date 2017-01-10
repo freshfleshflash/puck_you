@@ -1,10 +1,12 @@
 class Ball extends FCircle {
+  
   int id;
 
   ArrayList<String> words = new ArrayList<String>();
 
   float size = 50;
   boolean removed = false;
+  int wordsLimit = 10;
 
   AudioPlayer audio;
 
@@ -20,15 +22,15 @@ class Ball extends FCircle {
     this.setRestitution(1);  
     this.setFriction(0);
     this.setDamping(0);
-    this.setPosition(player.x, player.slot);
-    this.setVelocity(-1000 * player.player, 0);
+    this.setPosition(player.x+70*player.player, player.slot);
+    this.setVelocity(-500 * player.player, 0);
     this.setNoStroke();
     this.setNoFill();
   }
 
   void display() {
     String wordsSum = sumString(words);
-    while (wordsSum.length() < 10) {
+    while (wordsSum.length() < wordsLimit) {
       wordsSum += '-';
     }
 
@@ -42,7 +44,7 @@ class Ball extends FCircle {
     for (int i = 0; i < wordsSum.length(); i++) {   
       if (removed || finished) break;
 
-      r = size / pow(2, ((int)i/10) + 1);
+      r = size / pow(2, ((int)i/wordsLimit) + 1);
       ts = r / 2;
       textSize(ts);
 

@@ -10,7 +10,8 @@ class FSVG extends FPoly {
     super();
 
     this.setGroupIndex(10000);
-    this.setFill(229, 71, 70);
+    this.setNoFill();
+    //this.setFill(229, 71, 70);
 
     RShape fullSvg = RG.loadShape("racket.svg");
     m_shape = fullSvg.getChild("object");
